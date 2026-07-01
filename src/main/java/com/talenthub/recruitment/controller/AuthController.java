@@ -22,7 +22,6 @@ public class AuthController {
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        // TODO: In the future, check if user is already authenticated and redirect to dashboard
         if (!model.containsAttribute("userRegisterDto")) {
             model.addAttribute("userRegisterDto", new UserRegisterDto());
         }
