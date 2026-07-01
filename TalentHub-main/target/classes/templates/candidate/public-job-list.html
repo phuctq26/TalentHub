@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Public Job List</title>
+</head>
+<body>
+<header>
+    <nav>
+        <a th:href="@{/jobs}">View Jobs</a>
+    </nav>
+</header>
+
+<main>
+    <form th:action="@{/jobs}" method="get">
+        <input type="text" name="keyword" placeholder="Search by job title..." th:value="${keyword}">
+        <input type="text" name="department" placeholder="Department" th:value="${department}">
+        <input type="text" name="location" placeholder="Location" th:value="${location}">
+        <button type="submit">Search</button>
+        <a th:href="@{/jobs}">Reset</a>
+    </form>
+
+    <div th:if="${jobPage.isEmpty()}">
+        <p>No active jobs found.</p>
+    </div>
+
+    <table th:if="${!jobPage.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Department</th>
+            <th>Location</th>
+            <th>Salary</th>
+            <th>Deadline</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="job : ${jobPage.content}">
+            <td th:text="${job.title}"></td>
+            <td th:text="${job.department}"></td>
+            <td th:text="${job.location}"></td>
+            <td th:text="${job.salaryRange != null ? job.salaryRange : 'Negotiable'}"></td>
+            <td th:text="${job.applicationDeadline}"></td>
+            <td><a th:href="@{/jobs/{id}(id=${job.id})}">View Details</a></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div>
+        <a th:if="${jobPage.hasPrevious()}"
+           th:href="@{/jobs(page=${jobPage.number - 1}, keyword=${keyword}, department=${department}, location=${location})}">
+            Previous
+        </a>
+
+        <span th:text="${jobPage.number + 1}"></span>
+        <span>/</span>
+        <span th:text="${jobPage.totalPages}"></span>
+
+        <a th:if="${jobPage.hasNext()}"
+           th:href="@{/jobs(page=${jobPage.number + 1}, keyword=${keyword}, department=${department}, location=${location})}">
+            Next
+        </a>
+    </div>
+</main>
+</body>
+</html>

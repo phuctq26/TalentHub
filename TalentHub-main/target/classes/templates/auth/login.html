@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User Login — TalentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="auth-container">
+    <!-- Logo -->
+    <img th:src="@{/images/logo.png}" alt="TalentHub Logo" class="logo">
+
+    <h1>User Login to TalentHub</h1>
+
+    <!-- Banner: tài khoản bị khóa (SCR-01 Lockout banner) -->
+    <div th:if="${lockoutError}" class="alert alert-danger" role="alert">
+        Your account has been temporarily locked after too many failed attempts.
+        Try again in 10 minutes or contact your administrator.
+    </div>
+
+    <!-- Banner: sai mật khẩu (SCR-01 Generic error banner) -->
+    <div th:if="${genericError}" class="alert alert-danger" role="alert">
+        Incorrect username or password.
+    </div>
+
+    <form th:action="@{/login}" method="post">
+        <!-- Thymeleaf tự thêm CSRF token nếu cần, ở đây ta bỏ qua -->
+
+        <div class="form-group">
+            <label for="usernameOrEmail">Username or email</label>
+            <input type="text" id="usernameOrEmail" name="usernameOrEmail"
+                   required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="password" name="password"
+                       required autocomplete="current-password">
+                <button type="button" class="toggle-password"
+                        onclick="togglePassword()">👁</button>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">
+            User Login
+        </button>
+    </form>
+
+    <!-- Link "Create an account" — luôn hiển thị dù có lockout -->
+    <p class="text-center">
+        Don't have an account?
+        <a th:href="@{/register}">Create an account</a>
+    </p>
+
+    <!-- Link Forgot password -->
+    <p class="text-center">
+        <a th:href="@{/forgot-password}">Forgot password?</a>
+    </p>
+</div>
+
+<script>
+    function togglePassword() {
+        const field = document.getElementById('password');
+        field.type = field.type === 'password' ? 'text' : 'password';
+    }
+</script>
+</body>
+</html>
