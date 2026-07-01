@@ -16,6 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
     Optional<User> findByUsernameOrEmail(String username, String email);
+    boolean existsByUsername(String username);
+    boolean existsByEmail(String email);
 
     @Query(value = """
         SELECT * FROM users u
@@ -24,8 +26,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
           AND (:keyword IS NULL OR :keyword = '' OR
                LOWER(u.full_name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
                LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-               LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-               u.phone LIKE CONCAT('%', :keyword, '%'))
+               LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR 
+               u.phone LIKE CONCAT('%', :keyword, '%'))         
         ORDER BY u.created_at DESC
         """, nativeQuery = true)
     List<User> search(

@@ -1,0 +1,575 @@
+/* Premium Design Theme Variables */
+:root {
+    --primary-color: #1e293b;
+    --primary-light: #334155;
+    --accent-color: #0f766e;
+    --accent-hover: #115e59;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-color: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --danger-color: #ef4444;
+    --success-color: #5AD88B;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --bs-badge-font-size: 1.00em;
+}
+
+/* Reset and Global Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--primary-color);
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 1rem;
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+    color: var(--accent-hover);
+}
+
+/* Header and Navigation */
+.header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+}
+
+.nav {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav a {
+    color: var(--text-muted);
+    font-weight: 550;
+    font-size: 0.95rem;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid transparent;
+}
+
+.nav a:hover,
+.nav a.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+    color: white;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border-color: var(--border-color);
+    color: var(--primary-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-color);
+}
+
+.btn-login {
+    color: var(--primary-color);
+}
+
+.btn-login:hover {
+    color: var(--accent-color);
+}
+
+.btn-register {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-register:hover {
+    background-color: var(--accent-hover);
+    color: white;
+}
+
+/* Main Content Layout */
+.main-content {
+    flex: 1;
+    padding: 3rem 0;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 2rem 0;
+    margin-top: auto;
+    border-top: 1px solid var(--primary-light);
+}
+
+.footer p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Cards & Layouts for lists */
+.card {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Forms styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+.form-error {
+    color: var(--danger-color);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+/* Alert Boxes */
+.alert {
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+    border: 1px solid transparent;
+}
+
+.alert-danger {
+    background-color: #fef2f2;
+    border-color: #fee2e2;
+    color: #991b1b;
+}
+
+.alert-success {
+    background-color: #ecfdf5;
+    border-color: #d1fae5;
+    color: #065f46;
+}
+
+/* User Management Table Styles */
+.table-users {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg);
+    table-layout: fixed;
+}
+
+.table-users th,
+.table-users td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: middle;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.table-users th:last-child,
+.table-users td:last-child {
+    border-right: none;
+}
+
+.table-users th {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table-users tr:nth-child(even) td {
+    background-color: #fafbfc;
+}
+
+.table-users tr:nth-child(odd) td {
+    background-color: var(--card-bg);
+}
+
+.table-users tr:hover td {
+    background-color: #f1f5f9;
+}
+
+/* Column Width Definitions */
+.col-id {
+    width: 70px;
+}
+
+.col-username {
+    width: 140px;
+}
+
+.col-name {
+    width: 180px;
+}
+
+.col-email {
+    width: 230px;
+}
+
+.col-role {
+    width: 120px;
+}
+
+.col-status {
+    width: 120px;
+}
+
+.col-actions {
+    width: 240px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.status-enabled {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #d1fae5;
+}
+
+.status-disabled {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fee2e2;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.action-buttons a {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--primary-light);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.action-buttons a:hover {
+    background-color: var(--bg-color);
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.action-buttons a.action-delete {
+    color: var(--danger-color);
+    border-color: #fee2e2;
+    background-color: #fef2f2;
+}
+
+.action-buttons a.action-delete:hover {
+    background-color: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+}
+
+/* Custom Table Styles for Lists (Generic) */
+.table-custom {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg);
+    table-layout: fixed;
+}
+
+.table-custom th,
+.table-custom td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: middle;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.table-custom th:last-child,
+.table-custom td:last-child {
+    border-right: none;
+}
+
+.table-custom th {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table-custom tr:nth-child(even) td {
+    background-color: #fafbfc;
+}
+
+.table-custom tr:nth-child(odd) td {
+    background-color: var(--card-bg);
+}
+
+.table-custom tr:hover td {
+    background-color: #f1f5f9;
+}
+
+/* Detail Info Layout */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.detail-item {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+}
+
+.detail-item-full {
+    grid-column: span 2;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+}
+
+.detail-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.detail-value {
+    font-size: 1rem;
+    color: var(--text-color);
+    font-weight: 550;
+}
+
+/* Job Posting Custom Styles */
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.search-form-container {
+    margin-bottom: 2rem;
+}
+
+.search-input-group {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 600px;
+}
+
+.salary-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background-color: #f1f5f9;
+    color: var(--accent-color);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.job-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #d1fae5;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Form Layout Custom Styles */
+.form-card-container {
+    max-width: 700px;
+    margin: 2rem auto;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Skills Checkbox Grid and pill badges */
+.skills-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.skill-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.skill-checkbox-item input {
+    cursor: pointer;
+}
+
+.skill-tag-badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-right: 0.35rem;
+    margin-bottom: 0.35rem;
+}

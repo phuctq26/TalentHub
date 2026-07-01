@@ -1,7 +1,8 @@
 package com.talenthub.recruitment.entity;
 
 import com.talenthub.recruitment.entity.enums.AccountStatus;
-import com.talenthub.recruitment.entity.enums.UserRole;
+// Đã xóa import UserRole Enum
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -53,9 +54,9 @@ public class User {
     private String passwordHash;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "user_role")
-    private UserRole role;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -107,6 +108,7 @@ public class User {
         updatedAt = Instant.now();
     }
 
+
     public Long getId() {
         return id;
     }
@@ -147,11 +149,12 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
-    public UserRole getRole() {
+    // Getter & Setter mới cho Role Entity
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(UserRole role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

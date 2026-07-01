@@ -29,7 +29,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             return false;
         }
         // Kiểm tra phân quyền theo prefix URL
-        if (!hasPermission(currentUser.getRole(), path)) {
+        String roleName = currentUser.getRole().getName();
+        if (!hasPermission(UserRole.valueOf(roleName), path)) {
             response.sendError(403, "Forbidden");
             return false;
         }

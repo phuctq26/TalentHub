@@ -5,7 +5,6 @@ import com.talenthub.recruitment.dto.UserRegisterDto;
 import com.talenthub.recruitment.entity.Role;
 import com.talenthub.recruitment.entity.User;
 import com.talenthub.recruitment.entity.enums.AccountStatus;
-import com.talenthub.recruitment.entity.enums.UserRole;
 import com.talenthub.recruitment.repository.RoleRepository;
 import com.talenthub.recruitment.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -46,7 +45,7 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         
-        Role candidateRole = roleRepository.findByName(UserRole.CANDIDATE.name())
+        Role candidateRole = roleRepository.findByName("CANDIDATE")
                 .orElseThrow(() -> new RuntimeException("Candidate role not found"));
         user.setRole(candidateRole);
         user.setStatus(AccountStatus.ACTIVE);
