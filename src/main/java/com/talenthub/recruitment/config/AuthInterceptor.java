@@ -10,39 +10,31 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
-
     @Override
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
                              Object handler) throws Exception {
-
         String path = request.getRequestURI();
-
         // Các đường dẫn công khai — không cần đăng nhập
         if (isPublicPath(path)) {
             return true; // cho đi tiếp
         }
-
         HttpSession session = request.getSession(false);
         User currentUser = (session != null)
                 ? (User) session.getAttribute("currentUser")
                 : null;
-
         // Chưa đăng nhập → về trang login
         if (currentUser == null) {
             response.sendRedirect("/login");
             return false;
         }
-
         // Kiểm tra phân quyền theo prefix URL
         if (!hasPermission(currentUser.getRole(), path)) {
             response.sendError(403, "Forbidden");
             return false;
         }
-
         return true; // có quyền → cho đi tiếp
     }
-
     private boolean isPublicPath(String path) {
         return path.startsWith("/login")
                 || path.startsWith("/logout")
@@ -54,7 +46,6 @@ public class AuthInterceptor implements HandlerInterceptor {
                 || path.startsWith("/js")
                 || path.startsWith("/images");
     }
-
     private boolean hasPermission(UserRole role, String path) {
         switch (role) {
             case ADMIN:
