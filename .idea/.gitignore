@@ -8,3 +8,14 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+# Target - Thư mục chứa code sau khi build của Maven (Bắt buộc phải ignore)
+target/
+*.egg-info
+
+# IntelliJ IDEA (Cấu hình của IDE, không nên push lên Git)
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+gen/
