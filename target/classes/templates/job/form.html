@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Form tin tuyển dụng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-4">
+
+    <h2 th:text="${isEdit} ? 'Chỉnh sửa tin tuyển dụng' : 'Tạo tin tuyển dụng'"></h2>
+
+    <div th:if="${isClosed}" class="alert alert-info">
+        Tin tuyển dụng đã đóng, không thể chỉnh sửa.
+    </div>
+
+    <form th:action="@{/jobs/manage/save}"
+          method="post"
+          th:object="${job}">
+
+        <input type="hidden" th:field="*{id}">
+
+        <div class="mb-3">
+            <label class="form-label">Tiêu đề công việc</label>
+            <input type="text"
+                   th:field="*{title}"
+                   class="form-control"
+                   th:readonly="${isClosed}">
+            <div class="text-danger" th:errors="*{title}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Phòng ban</label>
+            <input type="text"
+                   th:field="*{department}"
+                   class="form-control"
+                   th:readonly="${isClosed}">
+            <div class="text-danger" th:errors="*{department}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Địa điểm</label>
+            <input type="text"
+                   th:field="*{location}"
+                   class="form-control"
+                   th:readonly="${isClosed}">
+            <div class="text-danger" th:errors="*{location}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mô tả công việc</label>
+            <textarea th:field="*{description}"
+                      class="form-control"
+                      rows="5"
+                      th:readonly="${isClosed}"></textarea>
+            <div class="text-danger" th:errors="*{description}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Yêu cầu công việc</label>
+            <textarea th:field="*{requirements}"
+                      class="form-control"
+                      rows="4"
+                      th:readonly="${isClosed}"></textarea>
+            <div class="text-danger" th:errors="*{requirements}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mức lương</label>
+            <input type="text"
+                   th:field="*{salaryRange}"
+                   class="form-control"
+                   placeholder="Ví dụ: 15-20 triệu"
+                   th:readonly="${isClosed}">
+            <div class="text-danger" th:errors="*{salaryRange}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Hạn nộp hồ sơ</label>
+            <input type="date"
+                   th:field="*{applicationDeadline}"
+                   class="form-control"
+                   th:readonly="${isClosed}">
+            <div class="text-danger" th:errors="*{applicationDeadline}"></div>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <button th:if="${!isClosed}"
+                    type="submit"
+                    class="btn btn-primary">
+                Lưu nháp
+            </button>
+
+            <button th:if="${isEdit && jobStatus.name() == 'DRAFT'}"
+                    type="submit"
+                    class="btn btn-success"
+                    th:formaction="@{/jobs/manage/publish-from-form}"
+                    onclick="return confirm('Bạn có chắc muốn đăng tin này không?')">
+                Lưu và đăng tin
+            </button>
+
+            <a th:if="${isEdit}"
+               th:href="@{/jobs/manage/{id}(id=*{id})}"
+               class="btn btn-secondary">
+                Hủy
+            </a>
+
+            <a th:if="${!isEdit}"
+               th:href="@{/jobs/manage}"
+               class="btn btn-secondary">
+                Hủy
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

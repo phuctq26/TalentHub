@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Apply Job</title>
+</head>
+<body>
+<header>
+    <nav>
+        <a th:href="@{/jobs}">View Jobs</a>
+    </nav>
+</header>
+
+<main>
+    <p th:if="${error}" th:text="${error}"></p>
+
+    <form th:action="@{/jobs/{id}/apply(id=${job.id})}" method="post" enctype="multipart/form-data">
+        <div>
+            <label>Job Title</label>
+            <input type="text" th:value="${job.title}" readonly>
+        </div>
+
+        <div>
+            <label>Candidate Name</label>
+            <input type="text" th:value="${candidate.fullName}" readonly>
+        </div>
+
+        <div>
+            <label>Email</label>
+            <input type="email" th:value="${candidate.email}" readonly>
+        </div>
+
+        <div>
+            <label>CV File</label>
+            <input type="file" name="cvFile" accept=".pdf,.doc,.docx" required>
+        </div>
+
+        <div>
+            <label>Cover Letter</label>
+            <textarea name="coverLetter" rows="8" th:text="${coverLetter}"></textarea>
+        </div>
+
+        <button type="submit">Submit</button>
+        <a th:href="@{/jobs/{id}(id=${job.id})}">Cancel</a>
+    </form>
+</main>
+</body>
+</html>
