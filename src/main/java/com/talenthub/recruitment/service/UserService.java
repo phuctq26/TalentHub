@@ -1,11 +1,15 @@
 package com.talenthub.recruitment.service;
 
 import com.talenthub.recruitment.dto.UserForm;
+import com.talenthub.recruitment.dto.UserRegisterDto;
 import com.talenthub.recruitment.entity.Role;
 import com.talenthub.recruitment.entity.User;
 import com.talenthub.recruitment.entity.enums.AccountStatus;
+import com.talenthub.recruitment.entity.enums.UserRole;
 import com.talenthub.recruitment.repository.RoleRepository;
 import com.talenthub.recruitment.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,10 +20,38 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.passwordEncoder = new BCryptPasswordEncoder();
+    }
+
+    @Transactional
+    public User registerCandidate(UserRegisterDto dto) {
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            throw new IllegalArgumentException("Username is already taken");
+        }
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Email address is already registered");
+        }
+
+        User user = new User();
+        user.setFullName(dto.getFullName());
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        
+        Role candidateRole = roleRepository.findByName(UserRole.CANDIDATE.name())
+                .orElseThrow(() -> new RuntimeException("Candidate role not found"));
+        user.setRole(candidateRole);
+        user.setStatus(AccountStatus.ACTIVE);
+
+        return userRepository.save(user);
     }
 
     public List<User> search(String keyword, Integer roleId, AccountStatus status) {
