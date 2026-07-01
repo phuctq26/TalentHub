@@ -80,7 +80,7 @@ public class ApplyJobController {
         }
 
         User user = toUser(sessionUser);
-        if (user == null || user.getRole() == null || !"CANDIDATE".equalsIgnoreCase(user.getRole().getName())) {
+        if (user == null || user.getRole() != UserRole.CANDIDATE) {
             return null;
         }
         return user;
