@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Detail</title>
+</head>
+<body>
+<header>
+    <nav>
+        <a th:href="@{/jobs}">View Jobs</a>
+    </nav>
+</header>
+
+<main>
+    <a th:href="@{/jobs}">Back to Jobs</a>
+
+    <h1 th:text="${job.title}"></h1>
+
+    <p>
+        <strong>Department:</strong>
+        <span th:text="${job.department}"></span>
+    </p>
+    <p>
+        <strong>Location:</strong>
+        <span th:text="${job.location}"></span>
+    </p>
+    <p>
+        <strong>Status:</strong>
+        <span th:text="${job.status}"></span>
+    </p>
+    <p>
+        <strong>Salary Range:</strong>
+        <span th:text="${job.salaryRange != null ? job.salaryRange : 'Negotiable'}"></span>
+    </p>
+    <p>
+        <strong>Application Deadline:</strong>
+        <span th:text="${job.applicationDeadline}"></span>
+    </p>
+
+    <hr>
+
+    <h2>Job Description</h2>
+    <p th:text="${job.description}"></p>
+
+    <h2>Requirements</h2>
+    <p th:text="${job.requirements}"></p>
+
+    <hr>
+
+    <a th:href="@{/jobs/{id}/apply(id=${job.id})}">Apply Now</a>
+</main>
+</body>
+</html>
