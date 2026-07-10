@@ -58,6 +58,11 @@
 
             <div class="d-flex gap-2 flex-wrap">
 
+                <a th:href="@{/hr/jobs/{id}/pipeline-report(id=${job.id})}"
+                   class="btn btn-outline-primary">
+                    Pipeline Report
+                </a>
+
                 <a th:if="${job.status.name() == 'DRAFT' || job.status.name() == 'ACTIVE'}"
                    th:href="@{/jobs/manage/{id}/edit(id=${job.id})}"
                    class="btn btn-warning">

@@ -103,11 +103,11 @@
                     <tbody>
                         <tr th:each="job : ${activeJobs}">
                             <td class="ps-3">
-                                <a th:href="@{/jobs/manage/{id}(id=${job.id})}" th:text="${job.title}" class="fw-bold text-decoration-none text-primary">Java Developer</a>
+                                <a th:href="@{/hr/jobs/{id}/pipeline-report(id=${job.id})}" th:text="${job.title}" class="fw-bold text-decoration-none text-primary">Java Developer</a>
                             </td>
                             <td th:text="${job.department}">Phòng ban</td>
                             <td>
-                                <span class="badge bg-light text-dark fw-bold border" th:text="${jobAppCounts.get(job.id)} + ' Đơn'">0 Đơn</span>
+                                <a th:href="@{/hr/jobs/{id}/pipeline-report(id=${job.id})}" class="badge bg-light text-dark fw-bold border text-decoration-none" th:text="${jobAppCounts.get(job.id)} + ' Đơn'">0 Đơn</a>
                             </td>
                             <td class="pe-3 text-secondary small" th:text="${job.applicationDeadline != null ? job.applicationDeadline : '-'}">Hạn nộp</td>
                         </tr>
