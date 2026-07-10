@@ -1,0 +1,123 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, 'HR Dashboard', 'hr-dashboard')}">
+<body>
+<main th:fragment="main-content">
+
+    <!-- Header Actions Row -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold text-dark">Bảng điều khiển Nhân sự</h2>
+            <p class="text-muted mb-0">Theo dõi tiến độ tuyển dụng, hồ sơ ứng tuyển và lịch phỏng vấn thời gian thực (SCR-06)</p>
+        </div>
+        <div>
+            <a th:href="@{/jobs/manage/new}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Tạo Job mới (SCR-11)
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row -->
+    <div class="row g-4 mb-4">
+        
+        <!-- Active Jobs Count Card -->
+        <div class="col-md-4">
+            <a th:href="@{/jobs/manage(status='ACTIVE')}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 transition-hover border-start border-primary border-4">
+                    <div class="card-body py-4 d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1 fw-bold text-uppercase small tracking-wider">Tin tuyển dụng hoạt động</h6>
+                            <h2 class="text-primary mb-0 fw-bold" th:text="${activeJobsCount}">0</h2>
+                        </div>
+                        <div class="rounded-circle bg-primary-subtle text-primary p-3">
+                            <i class="bi bi-briefcase-fill fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Applications Awaiting Review Card -->
+        <div class="col-md-4">
+            <a th:href="@{/hr/applications}" class="text-decoration-none">
+                <div class="card border-0 shadow-sm h-100 transition-hover border-start border-warning border-4">
+                    <div class="card-body py-4 d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1 fw-bold text-uppercase small tracking-wider">Hồ sơ chờ duyệt</h6>
+                            <h2 class="text-warning mb-0 fw-bold" th:text="${awaitingReviewCount}">0</h2>
+                        </div>
+                        <div class="rounded-circle bg-warning-subtle text-warning p-3">
+                            <i class="bi bi-file-earmark-person-fill fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Upcoming Interviews Card -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 border-start border-success border-4">
+                <div class="card-body py-4 d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted mb-1 fw-bold text-uppercase small tracking-wider">Lịch phỏng vấn (7 ngày tới)</h6>
+                        <h2 class="text-success mb-0 fw-bold" th:text="${upcomingInterviewsCount}">0</h2>
+                    </div>
+                    <div class="rounded-circle bg-success-subtle text-success p-3">
+                        <i class="bi bi-calendar-event-fill fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Active Jobs Table Section -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-list-task text-primary me-1"></i> Danh sách tin tuyển dụng đang hoạt động</h5>
+        </div>
+        <div class="card-body p-0">
+            
+            <!-- Empty state condition (No active jobs) -->
+            <div th:if="${#lists.isEmpty(activeJobs)}" class="p-5 text-center">
+                <div class="mb-3">
+                    <i class="bi bi-folder-x fs-1 text-muted"></i>
+                </div>
+                <h5 class="fw-bold text-dark">Bạn chưa có tin tuyển dụng nào đang hoạt động.</h5>
+                <p class="text-muted small mb-4">Tạo mới một tin tuyển dụng để bắt đầu nhận hồ sơ ứng tuyển từ các ứng viên tiềm năng.</p>
+                <a th:href="@{/jobs/manage/new}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Tạo Job mới
+                </a>
+            </div>
+
+            <!-- Active Jobs Table -->
+            <div class="table-responsive" th:if="${!#lists.isEmpty(activeJobs)}">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Vị trí tuyển dụng</th>
+                            <th>Phòng ban</th>
+                            <th>Số lượng ứng tuyển</th>
+                            <th class="pe-3">Hạn nộp hồ sơ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="job : ${activeJobs}">
+                            <td class="ps-3">
+                                <a th:href="@{/jobs/manage/{id}(id=${job.id})}" th:text="${job.title}" class="fw-bold text-decoration-none text-primary">Java Developer</a>
+                            </td>
+                            <td th:text="${job.department}">Phòng ban</td>
+                            <td>
+                                <span class="badge bg-light text-dark fw-bold border" th:text="${jobAppCounts.get(job.id)} + ' Đơn'">0 Đơn</span>
+                            </td>
+                            <td class="pe-3 text-secondary small" th:text="${job.applicationDeadline != null ? job.applicationDeadline : '-'}">Hạn nộp</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+</body>
+</html>

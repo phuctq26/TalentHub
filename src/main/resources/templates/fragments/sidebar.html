@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--/* ============================================================
+     SIDEBAR FRAGMENT
+     Usage: <div th:replace="~{fragments/sidebar :: sidebar(activeTab='users')}"></div>
+     Requires: session attribute "currentRole" (String: ADMIN | HR_MANAGER | INTERVIEWER | CANDIDATE)
+     ============================================================ */-->
+
+<nav id="app-sidebar" th:fragment="sidebar(activeTab)">
+
+    <!-- Brand -->
+    <div class="sidebar-brand">
+        <span class="sidebar-brand-icon">&#9670;</span>
+        <span class="sidebar-brand-text">TalentHub</span>
+    </div>
+
+    <!-- ===================== ADMIN ===================== -->
+    <div th:if="${session.currentRole == 'ADMIN'}">
+
+        <div class="sidebar-group">
+            <span class="sidebar-group-label">Dashboard</span>
+            <a th:href="@{/admin/dashboard}"
+               th:classappend="${activeTab == 'admin-dashboard'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#9632;</span> Admin Dashboard
+            </a>
+            <a th:href="@{/hr/dashboard}"
+               th:classappend="${activeTab == 'hr-dashboard'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#9632;</span> HR Dashboard
+            </a>
+        </div>
+
+        <div class="sidebar-group">
+            <span class="sidebar-group-label">Hệ thống</span>
+            <a th:href="@{/admin/users}"
+               th:classappend="${activeTab == 'users'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#128100;</span> Quản lý Users
+            </a>
+            <a th:href="@{/admin/audit-log}"
+               th:classappend="${activeTab == 'audit-log'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#128196;</span> Activity Log
+            </a>
+        </div>
+
+        <div class="sidebar-group">
+            <span class="sidebar-group-label">Tuyển dụng</span>
+            <a th:href="@{/jobs/manage}"
+               th:classappend="${activeTab == 'job-postings'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#128188;</span> Job Postings
+            </a>
+            <a th:href="@{/hr/applications}"
+               th:classappend="${activeTab == 'applications'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#128203;</span> Applications
+            </a>
+            <a th:href="@{/hr/reports}"
+               th:classappend="${activeTab == 'reports'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#128200;</span> Pipeline Report
+            </a>
+        </div>
+
+    </div>
+
+    <!-- ===================== HR_MANAGER ===================== -->
+    <div th:if="${session.currentRole == 'HR_MANAGER'}">
+
+        <div class="sidebar-group">
+            <span class="sidebar-group-label">Dashboard</span>
+            <a th:href="@{/hr/dashboard}"
+               th:classappend="${activeTab == 'hr-dashboard'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#9632;</span> HR Dashboard
+            </a>
+        </div>
+
+        <div class="sidebar-group">
+            <span class="sidebar-group-label">Job Management</span>
+            <a th:href="@{/jobs/manage}"
+               th:classappend="${activeTab == 'job-postings'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#128188;</span> Danh sách Jobs
+            </a>
+            <a th:href="@{/jobs/manage/new}"
+               th:classappend="${activeTab == 'job-new'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#43;</span> Tạo Job mới
+            </a>
+        </div>
+
+        <div class="sidebar-group">
+            <span class="sidebar-group-label">Recruitment Pipeline</span>
+            <a th:href="@{/hr/applications}"
+               th:classappend="${activeTab == 'applications'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#128203;</span> Tất cả Applications
+            </a>
+            <a th:href="@{/hr/reports}"
+               th:classappend="${activeTab == 'reports'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#128200;</span> Pipeline Report
+            </a>
+        </div>
+
+    </div>
+
+    <!-- ===================== INTERVIEWER ===================== -->
+    <div th:if="${session.currentRole == 'INTERVIEWER'}">
+
+        <div class="sidebar-group">
+            <span class="sidebar-group-label">Assignments</span>
+            <a th:href="@{/interviewer/applications}"
+               th:classappend="${activeTab == 'interviewer-apps'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#128203;</span> Đánh giá của tôi
+            </a>
+        </div>
+
+    </div>
+
+    <!-- ===================== CANDIDATE ===================== -->
+    <div th:if="${session.currentRole == 'CANDIDATE'}">
+
+        <div class="sidebar-group">
+            <span class="sidebar-group-label">Tìm việc</span>
+            <a th:href="@{/jobs}"
+               th:classappend="${activeTab == 'candidate-jobs'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#128269;</span> Danh sách việc làm
+            </a>
+        </div>
+
+        <div class="sidebar-group">
+            <span class="sidebar-group-label">Hồ sơ của tôi</span>
+            <a th:href="@{/candidate/applications}"
+               th:classappend="${activeTab == 'candidate-apps'} ? ' active' : ''"
+               class="sidebar-link">
+                <span class="sidebar-icon">&#128203;</span> Ứng tuyển của tôi
+            </a>
+        </div>
+
+    </div>
+
+</nav>
+
+</body>
+</html>

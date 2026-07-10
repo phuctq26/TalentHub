@@ -1,6 +1,7 @@
 package com.talenthub.recruitment.controller;
 
 import com.talenthub.recruitment.dto.UserForm;
+import com.talenthub.recruitment.entity.Role;
 import com.talenthub.recruitment.entity.User;
 import com.talenthub.recruitment.entity.enums.AccountStatus;
 import com.talenthub.recruitment.repository.RoleRepository;
@@ -14,6 +15,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @Controller
@@ -27,29 +31,43 @@ public class UserController {
         this.roleRepository = roleRepository;
     }
 
+    private List<Role> getManageableRoles() {
+        return roleRepository.findAll().stream()
+                .filter(r -> "HR_MANAGER".equalsIgnoreCase(r.getName()) || "INTERVIEWER".equalsIgnoreCase(r.getName()))
+                .toList();
+    }
+
     @GetMapping
     public String listUsers(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer roleId,
             @RequestParam(required = false) AccountStatus status,
+            @RequestParam(defaultValue = "0") int page,
             Model model) {
 
-        List<User> users = userService.search(keyword, roleId, status);
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<User> userPage = userService.search(keyword, roleId, status, pageable);
 
-        model.addAttribute("users", users);
+        model.addAttribute("users", userPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", userPage.getTotalPages());
+        model.addAttribute("totalItems", userPage.getTotalElements());
         model.addAttribute("keyword", keyword);
         model.addAttribute("roleId", roleId);
         model.addAttribute("status", status);
         model.addAttribute("roles", roleRepository.findAll());
         model.addAttribute("statuses", AccountStatus.values());
+        model.addAttribute("isOnlyOneAdminRemaining", userService.isOnlyOneAdminRemaining());
 
         return "admin/user-list";
     }
 
     @GetMapping("/new")
     public String createUserForm(Model model) {
-        model.addAttribute("userForm", new UserForm());
-        model.addAttribute("roles", roleRepository.findAll());
+        UserForm form = new UserForm();
+        form.setStatus(AccountStatus.ACTIVE);
+        model.addAttribute("userForm", form);
+        model.addAttribute("roles", getManageableRoles());
         model.addAttribute("statuses", AccountStatus.values());
         model.addAttribute("isEdit", false);
         return "admin/user-form";
@@ -59,7 +77,7 @@ public class UserController {
     public String editUserForm(@PathVariable Long id, Model model) {
         UserForm form = userService.getFormById(id);
         model.addAttribute("userForm", form);
-        model.addAttribute("roles", roleRepository.findAll());
+        model.addAttribute("roles", getManageableRoles());
         model.addAttribute("statuses", AccountStatus.values());
         model.addAttribute("isEdit", true);
         return "admin/user-form";
@@ -78,7 +96,7 @@ public class UserController {
         }
 
         if (result.hasErrors()) {
-            model.addAttribute("roles", roleRepository.findAll());
+            model.addAttribute("roles", getManageableRoles());
             model.addAttribute("statuses", AccountStatus.values());
             model.addAttribute("isEdit", form.getId() != null);
             return "admin/user-form";
@@ -89,7 +107,7 @@ public class UserController {
             redirectAttributes.addFlashAttribute("successMessage", "Lưu thông tin người dùng thành công!");
         } catch (Exception e) {
             result.rejectValue("username", "Duplicate", e.getMessage());
-            model.addAttribute("roles", roleRepository.findAll());
+            model.addAttribute("roles", getManageableRoles());
             model.addAttribute("statuses", AccountStatus.values());
             model.addAttribute("isEdit", form.getId() != null);
             return "admin/user-form";
@@ -98,13 +116,13 @@ public class UserController {
         return "redirect:/admin/users";
     }
 
-    @PostMapping("/{id}/delete")
-    public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    @PostMapping("/{id}/unlock")
+    public String unlockUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            userService.delete(id);
-            redirectAttributes.addFlashAttribute("successMessage", "Xóa người dùng thành công!");
+            userService.unlock(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Mở khóa tài khoản thành công!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa người dùng: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể mở khóa tài khoản: " + e.getMessage());
         }
         return "redirect:/admin/users";
     }

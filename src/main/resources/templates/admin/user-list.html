@@ -1,15 +1,8 @@
-<!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Quản lý người dùng</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, 'Quản lý người dùng', 'users')}">
 <body>
-
-<div class="container mt-4">
-
-    <!-- Flash message -->
+<main th:fragment="main-content">
+    <!-- Alert Messages (Bootstrap 5 styling) -->
     <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
         <span th:text="${successMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -19,111 +12,175 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Quản lý người dùng</h2>
-        <a th:href="@{/admin/users/new}" class="btn btn-primary">Tạo người dùng mới</a>
+    <!-- Header Actions Row -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold text-dark">Danh sách người dùng</h2>
+            <p class="text-muted mb-0">Quản lý và phân quyền thành viên trong hệ thống (SCR-08)</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/change-password}" class="btn btn-outline-secondary">Đổi mật khẩu</a>
+            <a th:href="@{/admin/users/new}" class="btn btn-primary">+ Create Account</a>
+        </div>
     </div>
 
-    <!-- Search/Filter form -->
-    <form th:action="@{/admin/users}" method="get" class="row g-2 mb-4">
-        <div class="col-md-4">
-            <input type="text"
-                   name="keyword"
-                   class="form-control"
-                   placeholder="Tìm theo tên, username, email, sđt..."
-                   th:value="${keyword}">
-        </div>
+    <!-- Filters Card (Bootstrap 5 Card) -->
+    <div class="card mb-4 border-light shadow-sm">
+        <div class="card-body bg-light rounded">
+            <form th:action="@{/admin/users}" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold text-secondary small">Tìm kiếm</label>
+                    <input type="text"
+                           name="keyword"
+                           class="form-control py-2"
+                           placeholder="Tìm theo họ tên, email, username..."
+                           th:value="${keyword}">
+                </div>
 
-        <div class="col-md-3">
-            <select name="roleId" class="form-select">
-                <option value="">Tất cả vai trò</option>
-                <option th:each="r : ${roles}"
-                        th:value="${r.id}"
-                        th:text="${r.name}"
-                        th:selected="${r.id == roleId}">
-                </option>
-            </select>
-        </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold text-secondary small">Vai trò</label>
+                    <select name="roleId" class="form-select py-2">
+                        <option value="">All</option>
+                        <option th:each="r : ${roles}"
+                                th:value="${r.id}"
+                                th:text="${r.name}"
+                                th:selected="${r.id == roleId}">
+                        </option>
+                    </select>
+                </div>
 
-        <div class="col-md-3">
-            <select name="status" class="form-select">
-                <option value="">Tất cả trạng thái</option>
-                <option th:each="s : ${statuses}"
-                        th:value="${s}"
-                        th:text="${s}"
-                        th:selected="${s == status}">
-                </option>
-            </select>
-        </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold text-secondary small">Trạng thái</label>
+                    <select name="status" class="form-select py-2">
+                        <option value="">All</option>
+                        <option th:each="s : ${statuses}"
+                                th:value="${s}"
+                                th:text="${s}"
+                                th:selected="${s == status}">
+                        </option>
+                    </select>
+                </div>
 
-        <div class="col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-success w-100">Lọc</button>
-            <a th:href="@{/admin/users}" class="btn btn-secondary w-100">Làm mới</a>
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary py-2 w-100">Lọc</button>
+                    <a th:href="@{/admin/users}" class="btn btn-secondary py-2 w-100">Làm mới</a>
+                </div>
+            </form>
         </div>
-    </form>
-
-    <div th:if="${#lists.isEmpty(users)}" class="alert alert-warning">
-        Không tìm thấy người dùng nào phù hợp.
     </div>
 
-    <!-- User Table -->
-    <div class="table-responsive" th:if="${!#lists.isEmpty(users)}">
-        <table class="table table-striped table-hover align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Họ và tên</th>
-                    <th>Tên đăng nhập</th>
-                    <th>Email</th>
-                    <th>Số điện thoại</th>
-                    <th>Vai trò</th>
-                    <th>Trạng thái</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="user : ${users}">
-                    <td th:text="${user.id}">1</td>
-                    <td>
-                        <a th:href="@{/admin/users/{id}(id=${user.id})}" th:text="${user.fullName}" class="fw-bold text-decoration-none">Nguyễn Văn A</a>
-                    </td>
-                    <td th:text="${user.username}">nguyenvana</td>
-                    <td th:text="${user.email}">a@example.com</td>
-                    <td th:text="${user.phone != null && user.phone != '' ? user.phone : '-'}">-</td>
-                    <td>
-                        <span class="badge bg-info text-dark" th:text="${user.role != null ? user.role.name : 'Chưa gán'}">ADMIN</span>
-                    </td>
-                    <td>
-                        <span class="badge"
-                              th:classappend="${user.status.name() == 'ACTIVE'} ? 'bg-success' : (${user.status.name() == 'LOCKED'} ? 'bg-warning text-dark' : 'bg-danger')"
-                              th:text="${user.status}">ACTIVE</span>
-                    </td>
-                    <td>
-                        <div class="d-flex gap-2">
-                            <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" class="btn btn-sm btn-warning">Sửa</a>
+    <!-- Warning / Empty state -->
+    <div th:if="${#lists.isEmpty(users)}" class="alert alert-warning border-0 shadow-sm" role="alert">
+        No accounts match your filters.
+    </div>
+
+    <!-- Users Table (Pure Bootstrap 5 styled) -->
+    <div class="card border-light shadow-sm" th:if="${!#lists.isEmpty(users)}">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-3" style="min-width: 180px;">Họ và tên</th>
+                        <th>Tên đăng nhập</th>
+                        <th>Email</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th class="pe-3" style="width: 130px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}">
+                        <!-- Full Name (Click to edit or view details) -->
+                        <td class="ps-3">
+                            <a th:href="@{/admin/users/{id}(id=${user.id})}" th:text="${user.fullName}" class="fw-bold text-decoration-none text-primary">Nguyễn Văn A</a>
+                        </td>
+                        <td th:text="${user.username}" class="text-secondary">nguyenvana</td>
+                        <td th:text="${user.email}">a@example.com</td>
+                        <td>
+                            <span class="badge bg-info text-dark" th:text="${user.role != null ? user.role.name : 'Chưa gán'}">ADMIN</span>
+                        </td>
+                        <td>
+                            <!-- Active Status -->
+                            <span th:if="${user.status.name() == 'ACTIVE'}" class="badge bg-success">ACTIVE</span>
                             
-                            <!-- Activate/Deactivate -->
-                            <form th:if="${user.status.name() != 'ACTIVE'}" th:action="@{/admin/users/{id}/activate(id=${user.id})}" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-success">Kích hoạt</button>
-                            </form>
-                            <form th:if="${user.status.name() == 'ACTIVE'}" th:action="@{/admin/users/{id}/deactivate(id=${user.id})}" method="post" style="display:inline;"
-                                  onsubmit="return confirm('Bạn có chắc muốn vô hiệu hóa tài khoản này không?')">
-                                <button type="submit" class="btn btn-sm btn-secondary">Vô hiệu hóa</button>
-                            </form>
+                            <!-- Locked Status (with lock icon) -->
+                            <span th:if="${user.status.name() == 'LOCKED'}" class="badge bg-warning text-dark d-inline-flex align-items-center">
+                                <i class="bi bi-lock-fill me-1"></i>LOCKED
+                            </span>
                             
-                            <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post"
-                                  onsubmit="return confirm('Bạn có chắc muốn xóa người dùng này không? Hành động này không thể hoàn tác.')" style="display:inline;">
-                                <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                            <!-- Inactive Status -->
+                            <span th:if="${user.status.name() == 'INACTIVE'}" class="badge bg-danger">INACTIVE</span>
+                        </td>
+                        <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">-</td>
+                        <td class="pe-3">
+                            <div class="d-flex gap-2">
+                                <!-- Edit Button -->
+                                <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                
+                                <!-- Unlock Button (Shown only when status = LOCKED) -->
+                                <form th:if="${user.status.name() == 'LOCKED'}" th:action="@{/admin/users/{id}/unlock(id=${user.id})}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn mở khóa tài khoản này?')">
+                                    <button type="submit" class="btn btn-sm btn-secondary" title="Mở khóa">
+                                        <i class="bi bi-unlock"></i>
+                                    </button>
+                                </form>
+                                
+                                <!-- Deactivate Button (Shown when status = ACTIVE or LOCKED; hidden when only Admin account remaining) -->
+                                <form th:if="${(user.status.name() == 'ACTIVE' || user.status.name() == 'LOCKED') && !(user.role != null && user.role.name == 'ADMIN' && isOnlyOneAdminRemaining)}"
+                                      th:action="@{/admin/users/{id}/deactivate(id=${user.id})}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Bạn có chắc muốn vô hiệu hóa tài khoản này không?')">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Vô hiệu hóa">
+                                        <i class="bi bi-slash-circle"></i>
+                                    </button>
+                                </form>
+
+                                <!-- Reactivate Button (Shown only when status = INACTIVE) -->
+                                <form th:if="${user.status.name() == 'INACTIVE'}" th:action="@{/admin/users/{id}/activate(id=${user.id})}" method="post" class="d-inline"
+                                      onsubmit="return confirm('Bạn có chắc muốn kích hoạt lại tài khoản này?')">
+                                    <button type="submit" class="btn btn-sm btn-primary" title="Kích hoạt lại">
+                                        <i class="bi bi-play-circle"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Pagination (Bootstrap 5) -->
+    <div class="d-flex justify-content-between align-items-center mt-4" th:if="${totalPages > 1}">
+        <div class="text-muted small">
+            Showing Page <span class="fw-bold" th:text="${currentPage + 1}">1</span> of <span class="fw-bold" th:text="${totalPages}">1</span>
+            (<span th:text="${totalItems}">0</span> items total)
+        </div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm mb-0">
+                <!-- Previous Button -->
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/users(page=${currentPage - 1}, keyword=${keyword}, roleId=${roleId}, status=${status})}">
+                        &laquo; Previous
+                    </a>
+                </li>
+                
+                <!-- Page Numbers -->
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link" th:href="@{/admin/users(page=${i}, keyword=${keyword}, roleId=${roleId}, status=${status})}" th:text="${i + 1}">1</a>
+                </li>
+                
+                <!-- Next Button -->
+                <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/users(page=${currentPage + 1}, keyword=${keyword}, roleId=${roleId}, status=${status})}">
+                        Next &raquo;
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</main>
 </body>
 </html>

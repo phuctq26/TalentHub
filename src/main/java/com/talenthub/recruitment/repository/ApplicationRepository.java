@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
 
@@ -45,4 +47,19 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
             @Param("cvStoragePath") String cvStoragePath,
             @Param("coverLetter") String coverLetter
     );
+
+    @Query(value = "SELECT COUNT(*) FROM applications WHERE CAST(status AS TEXT) = 'INTERVIEW'", nativeQuery = true)
+    long countInterviewStage();
+
+    @Query(value = "SELECT COUNT(*) FROM applications WHERE CAST(status AS TEXT) = 'HIRED'", nativeQuery = true)
+    long countHired();
+
+    @Query("SELECT a FROM Application a JOIN FETCH a.candidate JOIN FETCH a.job ORDER BY a.submittedAt DESC")
+    List<Application> findRecentApplications(org.springframework.data.domain.Pageable pageable);
+
+    @Query(value = "SELECT COUNT(a.id) FROM applications a JOIN job_postings j ON j.id = a.job_id WHERE CAST(a.status AS TEXT) = 'APPLIED' AND (:hrManagerId IS NULL OR j.created_by_id = :hrManagerId)", nativeQuery = true)
+    long countAwaitingReviewForHrOrAdmin(@Param("hrManagerId") Long hrManagerId);
+
+    @Query(value = "SELECT COUNT(*) FROM applications WHERE job_id = :jobId", nativeQuery = true)
+    long countByJobId(@Param("jobId") Long jobId);
 }

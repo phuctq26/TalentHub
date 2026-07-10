@@ -361,6 +361,12 @@ a:hover {
     border: 1px solid #fee2e2;
 }
 
+.status-locked {
+    background-color: #fefce8;
+    color: #854d0e;
+    border: 1px solid #fde68a;
+}
+
 .action-buttons {
     display: flex;
     gap: 0.5rem;
@@ -572,4 +578,305 @@ a:hover {
     font-weight: 600;
     margin-right: 0.35rem;
     margin-bottom: 0.35rem;
+}
+
+/* =============================================================
+   APP SHELL — Sidebar + Main Area
+   ============================================================= */
+
+/* Extra design tokens for the shell */
+:root {
+    --sidebar-width: 240px;
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #94a3b8;
+    --sidebar-text-hover: #f1f5f9;
+    --sidebar-active-bg: rgba(15, 118, 110, 0.15);
+    --sidebar-active-text: #0f766e;
+    --sidebar-active-border: #0f766e;
+    --sidebar-group-label: #475569;
+    --sidebar-brand-height: 64px;
+    --header-height: 60px;
+    --header-bg: #ffffff;
+    --header-border: #e2e8f0;
+}
+
+/* Shell wrapper: sidebar left + content right */
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* =============================================================
+   SIDEBAR
+   ============================================================= */
+#app-sidebar {
+    width: var(--sidebar-width);
+    min-height: 100vh;
+    background-color: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #334155 transparent;
+    flex-shrink: 0;
+}
+
+#app-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+#app-sidebar::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+/* Brand */
+.sidebar-brand {
+    height: var(--sidebar-brand-height);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 1.25rem;
+    border-bottom: 1px solid #1e293b;
+    flex-shrink: 0;
+}
+
+.sidebar-brand-icon {
+    color: var(--accent-color);
+    font-size: 1.1rem;
+}
+
+.sidebar-brand-text {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    letter-spacing: 0.01em;
+}
+
+/* Nav group */
+.sidebar-group {
+    padding: 1rem 0 0.5rem;
+}
+
+.sidebar-group-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--sidebar-group-label);
+    padding: 0 1.25rem 0.5rem;
+}
+
+/* Individual link */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--sidebar-text-hover);
+    border-left-color: #334155;
+}
+
+.sidebar-link.active {
+    background-color: var(--sidebar-active-bg);
+    color: var(--sidebar-active-text);
+    border-left-color: var(--sidebar-active-border);
+    font-weight: 600;
+}
+
+.sidebar-icon {
+    font-size: 0.85rem;
+    width: 1.1rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* =============================================================
+   HEADER (top bar)
+   ============================================================= */
+#app-header {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    height: var(--header-height);
+    background-color: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.75rem;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-page-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+    letter-spacing: 0.01em;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* =============================================================
+   USER AVATAR + DROPDOWN
+   ============================================================= */
+.user-dropdown-wrapper {
+    position: relative;
+}
+
+.user-avatar-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: 1.5px solid var(--border-color);
+    border-radius: 999px;
+    padding: 0.3rem 0.65rem 0.3rem 0.3rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-avatar-btn:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.user-avatar-initials {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color), #115e59);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0;
+}
+
+.user-avatar-caret {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+}
+
+/* Dropdown panel */
+.user-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 210px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 300;
+    overflow: hidden;
+    animation: dropdownFadeIn 0.15s ease;
+}
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.user-dropdown-info {
+    padding: 0.85rem 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.user-dropdown-name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-dropdown-role {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.user-dropdown-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 0;
+}
+
+.user-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.user-dropdown-item:hover {
+    background-color: var(--bg-color);
+    color: var(--accent-color);
+}
+
+.user-dropdown-item--danger {
+    color: var(--danger-color);
+}
+
+.user-dropdown-item--danger:hover {
+    background-color: #fef2f2;
+    color: var(--danger-color);
+}
+
+.dropdown-item-icon {
+    font-size: 0.9rem;
+    width: 1rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* =============================================================
+   MAIN CONTENT AREA (right of sidebar, below header)
+   ============================================================= */
+.app-main {
+    margin-left: var(--sidebar-width);
+    padding-top: var(--header-height);
+    flex: 1;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+}
+
+.app-main-inner {
+    padding: 2rem 2.25rem;
+    max-width: 1300px;
 }

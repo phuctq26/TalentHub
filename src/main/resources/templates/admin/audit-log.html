@@ -1,0 +1,91 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, 'Nhật ký hoạt động', 'audit-log')}">
+<body>
+<main th:fragment="main-content">
+    
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold text-dark">Nhật ký hoạt động</h2>
+            <p class="text-muted mb-0">Xem và truy vết các hoạt động đăng nhập, chỉnh sửa của người dùng trong hệ thống (SCR-09)</p>
+        </div>
+        <a th:href="@{/admin/dashboard}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Quay lại Dashboard
+        </a>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(logs)}" class="alert alert-warning border-0 shadow-sm" role="alert">
+        Không có bản ghi nhật ký hoạt động nào trong hệ thống.
+    </div>
+
+    <!-- Logs Table -->
+    <div class="card border-light shadow-sm" th:if="${!#lists.isEmpty(logs)}">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-3" style="width: 80px;">ID</th>
+                        <th style="width: 150px;">Sự kiện</th>
+                        <th style="width: 200px;">Người thực hiện</th>
+                        <th>Chi tiết hoạt động</th>
+                        <th style="width: 150px;">Địa chỉ IP</th>
+                        <th class="pe-3" style="width: 180px;">Thời gian</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logs}">
+                        <td class="ps-3 font-monospace text-muted" th:text="${log.id}">1</td>
+                        <td>
+                            <span class="badge bg-dark py-2 px-3 text-uppercase" th:text="${log.eventType}">LOGIN</span>
+                        </td>
+                        <td>
+                            <div>
+                                <strong th:text="${log.actorUsernameSnapshot}">admin</strong>
+                                <div class="text-muted small" th:text="${log.actorFullNameSnapshot}">Quản trị viên</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-dark fw-medium" th:text="${log.description}">Chi tiết hoạt động</span>
+                        </td>
+                        <td class="font-monospace text-secondary small" th:text="${log.ipAddress != null ? log.ipAddress : '-'}">127.0.0.1</td>
+                        <td class="pe-3 small text-muted" th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss', 'Asia/Ho_Chi_Minh') : '-'}">Thời gian</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination (Bootstrap 5) -->
+    <div class="d-flex justify-content-between align-items-center mt-4" th:if="${totalPages > 1}">
+        <div class="text-muted small">
+            Hiển thị trang <span class="fw-bold" th:text="${currentPage + 1}">1</span> / <span class="fw-bold" th:text="${totalPages}">1</span>
+            (<span th:text="${totalItems}">0</span> dòng tổng cộng)
+        </div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm mb-0">
+                <!-- Previous Button -->
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/audit-log(page=${currentPage - 1})}">
+                        &laquo; Trước
+                    </a>
+                </li>
+                
+                <!-- Page Numbers -->
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active'">
+                    <a class="page-link" th:href="@{/admin/audit-log(page=${i})}" th:text="${i + 1}">1</a>
+                </li>
+                
+                <!-- Next Button -->
+                <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/audit-log(page=${currentPage + 1})}">
+                        Sau &raquo;
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</main>
+</body>
+</html>

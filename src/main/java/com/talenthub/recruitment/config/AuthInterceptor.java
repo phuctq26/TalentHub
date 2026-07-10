@@ -28,6 +28,10 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.sendRedirect("/login");
             return false;
         }
+        // Cho phép tất cả tài khoản đã đăng nhập truy cập /change-password và /user/profile
+        if (path.startsWith("/change-password") || path.startsWith("/user/profile")) {
+            return true;
+        }
         // Kiểm tra phân quyền theo prefix URL
         String roleName = currentUser.getRole().getName();
         if (!hasPermission(UserRole.valueOf(roleName), path)) {
