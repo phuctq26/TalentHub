@@ -126,4 +126,34 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     @Query(value = "SELECT COUNT(*) FROM applications WHERE job_id = :jobId", nativeQuery = true)
     long countByJobId(@Param("jobId") Long jobId);
+
+    @Query(value = """
+            SELECT COUNT(*)
+            FROM applications
+            WHERE job_id = :jobId
+              AND CAST(status AS TEXT) = :status
+            """, nativeQuery = true)
+    long countByJobIdAndStatus(
+            @Param("jobId") Long jobId,
+            @Param("status") String status
+    );
+
+    @Query(
+            value = """
+                    SELECT *
+                    FROM applications
+                    WHERE job_id = :jobId
+                    ORDER BY submitted_at DESC
+                    """,
+            countQuery = """
+                    SELECT COUNT(*)
+                    FROM applications
+                    WHERE job_id = :jobId
+                    """,
+            nativeQuery = true
+    )
+    Page<Application> findByJobId(
+            @Param("jobId") Long jobId,
+            Pageable pageable
+    );
 }
