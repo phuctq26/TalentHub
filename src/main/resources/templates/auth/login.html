@@ -12,13 +12,12 @@
 
         <h1>User Login to TalentHub</h1>
 
-        <div th:if="${lockoutError}" role="alert">
-            Your account has been temporarily locked after too many failed attempts.
-            Try again in 10 minutes or contact your administrator.
+        <div th:if="${lockoutError}" role="alert" style="color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-weight: bold;">
+            ⚠️ Your account has been temporarily locked after too many failed attempts. Try again in 10 minutes.
         </div>
 
-        <div th:if="${genericError}" role="alert">
-            Incorrect username or password.
+        <div th:if="${genericError}" role="alert" style="color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-weight: bold;">
+            ❌ Incorrect username or password.
         </div>
 
         <form th:action="@{/login}" method="post">
