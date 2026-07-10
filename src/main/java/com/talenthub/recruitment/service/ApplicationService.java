@@ -1,19 +1,32 @@
 package com.talenthub.recruitment.service;
 
+import com.talenthub.recruitment.dto.MyApplicationResponse;
 import com.talenthub.recruitment.entity.JobPosting;
+import com.talenthub.recruitment.entity.Application;
+import com.talenthub.recruitment.entity.Interview;
 import com.talenthub.recruitment.entity.User;
 import com.talenthub.recruitment.entity.enums.ApplicationStatus;
 import com.talenthub.recruitment.repository.ApplicationRepository;
+import com.talenthub.recruitment.repository.InterviewRepository;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 public class ApplicationService {
@@ -26,10 +39,16 @@ public class ApplicationService {
     );
 
     private final ApplicationRepository applicationRepository;
+    private final InterviewRepository interviewRepository;
     private final PublicJobService publicJobService;
 
-    public ApplicationService(ApplicationRepository applicationRepository, PublicJobService publicJobService) {
+    public ApplicationService(
+            ApplicationRepository applicationRepository,
+            InterviewRepository interviewRepository,
+            PublicJobService publicJobService
+    ) {
         this.applicationRepository = applicationRepository;
+        this.interviewRepository = interviewRepository;
         this.publicJobService = publicJobService;
     }
 
@@ -55,6 +74,106 @@ public class ApplicationService {
                 storagePath,
                 coverLetter
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MyApplicationResponse> getMyApplications(
+            Long candidateId,
+            String status,
+            int page,
+            int size
+    ) {
+        validateCandidateId(candidateId);
+
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
+        ApplicationStatus applicationStatus = parseStatus(status);
+
+        Page<Application> applicationPage = applicationStatus == null
+                ? applicationRepository.findMyApplications(candidateId, pageable)
+                : applicationRepository.findMyApplicationsByStatus(
+                        candidateId,
+                        applicationStatus.name(),
+                        pageable
+                );
+
+        return applicationPage.map(this::toMyApplicationResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public MyApplicationResponse getMyApplicationDetail(Long candidateId, Long applicationId) {
+        validateCandidateId(candidateId);
+        Application application = applicationRepository.findByIdAndCandidate_Id(applicationId, candidateId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Application not found"));
+        return toMyApplicationResponse(application);
+    }
+
+    @Transactional
+    public void withdraw(Long candidateId, Long applicationId) {
+        validateCandidateId(candidateId);
+        Application application = applicationRepository.findByIdAndCandidate_Id(applicationId, candidateId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Application not found"));
+
+        if (!canWithdraw(application.getStatus())) {
+            throw new IllegalStateException("This application cannot be withdrawn at its current status.");
+        }
+
+        Instant now = Instant.now();
+        applicationRepository.withdrawApplication(
+                applicationId,
+                candidateId,
+                ApplicationStatus.WITHDRAWN.name(),
+                now,
+                now
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public CandidateCvFile getCandidateCv(Long candidateId, Long applicationId) {
+        validateCandidateId(candidateId);
+        Application application = applicationRepository.findByIdAndCandidate_Id(applicationId, candidateId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Application not found"));
+
+        Path cvPath = Paths.get(application.getCvStoragePath()).toAbsolutePath().normalize();
+        if (!Files.exists(cvPath) || !Files.isReadable(cvPath)) {
+            throw new ResponseStatusException(NOT_FOUND, "CV file not found");
+        }
+
+        return new CandidateCvFile(
+                new FileSystemResource(cvPath),
+                application.getCvFileName(),
+                application.getCvContentType()
+        );
+    }
+
+    public record CandidateCvFile(Resource resource, String fileName, String contentType) {
+    }
+
+    private MyApplicationResponse toMyApplicationResponse(Application application) {
+        Interview interview = interviewRepository
+                .findFirstByApplication_IdOrderByScheduledAtAsc(application.getId())
+                .orElse(null);
+        return MyApplicationResponse.fromEntity(application, interview);
+    }
+
+    private ApplicationStatus parseStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        try {
+            return ApplicationStatus.valueOf(status.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    private boolean canWithdraw(ApplicationStatus status) {
+        return status == ApplicationStatus.APPLIED || status == ApplicationStatus.SCREENING;
+    }
+
+    private void validateCandidateId(Long candidateId) {
+        if (candidateId == null) {
+            throw new IllegalStateException("Candidate is required.");
+        }
     }
 
     private void validateCandidate(User candidate) {

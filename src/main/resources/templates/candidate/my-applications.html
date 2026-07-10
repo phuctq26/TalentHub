@@ -1,0 +1,153 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, 'My Applications', 'candidate-apps')}">
+<body>
+<main th:fragment="main-content">
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold text-dark">My Applications</h2>
+            <p class="text-muted mb-0">Track the status of your submitted applications</p>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a th:href="@{/candidate/applications}"
+           class="btn btn-sm"
+           th:classappend="${selectedStatus == null || selectedStatus == ''} ? ' btn-dark' : ' btn-outline-dark'">
+            All
+        </a>
+        <a th:each="status : ${statuses}"
+           th:href="@{/candidate/applications(status=${status.name()})}"
+           th:text="${status.name()}"
+           class="btn btn-sm"
+           th:classappend="${selectedStatus != null && selectedStatus.equals(status.name())} ? ' btn-dark' : ' btn-outline-secondary'">
+            SCREENING
+        </a>
+    </div>
+
+    <div th:if="${applicationPage.isEmpty()}" class="p-5 text-center bg-white rounded shadow-sm border">
+        <i class="bi bi-file-earmark-text fs-1 text-muted"></i>
+        <h5 class="fw-bold text-dark mt-3">No applications found.</h5>
+        <p class="text-muted mb-4">Your submitted applications will appear here after you apply for a job.</p>
+        <a th:href="@{/jobs}" class="btn btn-primary">Find jobs</a>
+    </div>
+
+    <div class="card border-0 shadow-sm" th:if="${!applicationPage.isEmpty()}">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th class="ps-3" style="min-width: 220px;">Job Title</th>
+                    <th>Company</th>
+                    <th>Applied Date</th>
+                    <th>Status</th>
+                    <th>CV</th>
+                    <th>Last Updated</th>
+                    <th>Interview Date</th>
+                    <th class="pe-3" style="min-width: 150px;">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="app : ${applicationPage.content}">
+                    <td class="ps-3">
+                        <div class="fw-bold text-dark" th:text="${app.jobTitle}">Java Developer</div>
+                    </td>
+                    <td th:text="${app.companyName}">N/A</td>
+                    <td class="text-secondary small"
+                        th:text="${app.appliedAt != null ? #temporals.format(app.appliedAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">
+                        10/07/2026
+                    </td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${app.status == 'HIRED'} ? ' bg-success' :
+                                (${app.status == 'REJECTED' || app.status == 'WITHDRAWN'} ? ' bg-danger' :
+                                (${app.status == 'INTERVIEW'} ? ' bg-info text-dark' :
+                                (${app.status == 'OFFER'} ? ' bg-warning text-dark' : ' bg-primary')))"
+                              th:text="${app.status}">
+                            SCREENING
+                        </span>
+                    </td>
+                    <td>
+                        <a th:href="@{/candidate/applications/{id}/cv(id=${app.applicationId})}"
+                           target="_blank"
+                           rel="noopener"
+                           class="d-inline-flex align-items-center gap-1 text-decoration-none"
+                           th:title="${app.cvFileName}">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span th:text="${app.cvFileName}">resume.pdf</span>
+                        </a>
+                    </td>
+                    <td class="text-secondary small"
+                        th:text="${app.updatedAt != null ? #temporals.format(app.updatedAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">
+                        11/07/2026
+                    </td>
+                    <td class="text-secondary small"
+                        th:text="${app.interviewDate != null ? #temporals.format(app.interviewDate, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">
+                        -
+                    </td>
+                    <td class="pe-3">
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/candidate/applications/{id}(id=${app.applicationId})}"
+                               class="btn btn-sm btn-outline-primary"
+                               title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <form th:if="${app.status == 'APPLIED' || app.status == 'SCREENING'}"
+                                  th:action="@{/candidate/applications/{id}/withdraw(id=${app.applicationId})}"
+                                  method="post"
+                                  onsubmit="return confirm('Withdraw this application?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Withdraw">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4" th:if="${applicationPage.totalPages > 1}">
+        <div class="text-muted small">
+            Showing Page <span class="fw-bold" th:text="${applicationPage.number + 1}">1</span>
+            of <span class="fw-bold" th:text="${applicationPage.totalPages}">1</span>
+            (<span th:text="${applicationPage.totalElements}">0</span> applications)
+        </div>
+        <nav aria-label="Application page navigation">
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${applicationPage.first} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/candidate/applications(page=${applicationPage.number - 1}, status=${selectedStatus})}">
+                        &laquo; Previous
+                    </a>
+                </li>
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, applicationPage.totalPages - 1)}"
+                    th:classappend="${applicationPage.number == i} ? 'active'">
+                    <a class="page-link"
+                       th:href="@{/candidate/applications(page=${i}, status=${selectedStatus})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${applicationPage.last} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/candidate/applications(page=${applicationPage.number + 1}, status=${selectedStatus})}">
+                        Next &raquo;
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</main>
+</body>
+</html>

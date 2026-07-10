@@ -1,0 +1,100 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, 'Application Details', 'candidate-apps')}">
+<body>
+<main th:fragment="main-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1 fw-bold text-dark" th:text="${applicationDetail.jobTitle}">Java Developer</h2>
+            <p class="text-muted mb-0">Application details and current status</p>
+        </div>
+        <a th:href="@{/candidate/applications}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-file-earmark-person text-primary me-1"></i> Submitted Application
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted">Job Title</dt>
+                        <dd class="col-sm-8 fw-semibold" th:text="${applicationDetail.jobTitle}">Java Developer</dd>
+
+                        <dt class="col-sm-4 text-muted">Company</dt>
+                        <dd class="col-sm-8" th:text="${applicationDetail.companyName}">N/A</dd>
+
+                        <dt class="col-sm-4 text-muted">Applied Date</dt>
+                        <dd class="col-sm-8"
+                            th:text="${applicationDetail.appliedAt != null ? #temporals.format(applicationDetail.appliedAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">
+                            -
+                        </dd>
+
+                        <dt class="col-sm-4 text-muted">Last Updated</dt>
+                        <dd class="col-sm-8"
+                            th:text="${applicationDetail.updatedAt != null ? #temporals.format(applicationDetail.updatedAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">
+                            -
+                        </dd>
+
+                        <dt class="col-sm-4 text-muted">Interview Date</dt>
+                        <dd class="col-sm-8"
+                            th:text="${applicationDetail.interviewDate != null ? #temporals.format(applicationDetail.interviewDate, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">
+                            -
+                        </dd>
+
+                        <dt class="col-sm-4 text-muted">Uploaded CV</dt>
+                        <dd class="col-sm-8">
+                            <div class="fw-semibold" th:text="${applicationDetail.cvFileName}">resume.pdf</div>
+                            <div class="text-muted small mb-2">
+                                <span th:text="${applicationDetail.cvDisplayType}">PDF</span>
+                                <span>&bull;</span>
+                                <span th:text="${applicationDetail.cvDisplaySize}">1.8 MB</span>
+                            </div>
+                            <a th:href="@{/candidate/applications/{id}/cv(id=${applicationDetail.applicationId})}"
+                               target="_blank"
+                               rel="noopener"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye me-1"></i> View CV
+                            </a>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-muted small fw-bold text-uppercase mb-2">Current Status</div>
+                    <span class="badge fs-6"
+                          th:classappend="${applicationDetail.status == 'HIRED'} ? ' bg-success' :
+                            (${applicationDetail.status == 'REJECTED' || applicationDetail.status == 'WITHDRAWN'} ? ' bg-danger' :
+                            (${applicationDetail.status == 'INTERVIEW'} ? ' bg-info text-dark' :
+                            (${applicationDetail.status == 'OFFER'} ? ' bg-warning text-dark' : ' bg-primary')))"
+                          th:text="${applicationDetail.status}">
+                        SCREENING
+                    </span>
+
+                    <div class="mt-4 d-grid gap-2">
+                        <form th:if="${applicationDetail.status == 'APPLIED' || applicationDetail.status == 'SCREENING'}"
+                              th:action="@{/candidate/applications/{id}/withdraw(id=${applicationDetail.applicationId})}"
+                              method="post"
+                              onsubmit="return confirm('Withdraw this application?')">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-x-circle me-1"></i> Withdraw
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+</body>
+</html>

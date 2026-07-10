@@ -59,6 +59,7 @@ replay_pid*
 # ========================
 *.log
 logs/
+uploads/
 
 # ========================
 # OS generated files
