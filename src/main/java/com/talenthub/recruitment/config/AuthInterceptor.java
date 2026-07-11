@@ -25,12 +25,18 @@ public class AuthInterceptor implements HandlerInterceptor {
                 : null;
         // Chưa đăng nhập → về trang login
         if (currentUser == null) {
+            System.out.println("[AuthInterceptor] No user in session for path: " + path);
             response.sendRedirect("/login");
             return false;
         }
         // Kiểm tra phân quyền theo prefix URL
         String roleName = currentUser.getRole().getName();
-        if (!hasPermission(UserRole.valueOf(roleName), path)) {
+        boolean permitted = hasPermission(UserRole.valueOf(roleName), path);
+        System.out.println(String.format(
+            "[AuthInterceptor] User: %s | Role: %s | Path: %s | Permitted: %b",
+            currentUser.getUsername(), roleName, path, permitted
+        ));
+        if (!permitted) {
             response.sendError(403, "Forbidden");
             return false;
         }
@@ -43,6 +49,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 || path.startsWith("/forgot-password")
                 || path.startsWith("/verify-otp")
                 || path.startsWith("/reset-password")
+                || path.startsWith("/error")
                 || path.startsWith("/jobs")       // Public Job List SCR-13
                 || path.startsWith("/css")
                 || path.startsWith("/js")
