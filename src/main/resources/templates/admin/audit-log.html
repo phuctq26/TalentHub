@@ -83,7 +83,7 @@
                             <div>
                                 <strong>
                                     <span th:text="${log.actorUsernameSnapshot}">admin</span>
-                                    <span th:if="${log.actorUser != null and log.actorUser.status.name() == 'INACTIVE'}" class="text-danger small">(deactivated)</span>
+                                    <span th:if="${log.actorUser != null and log.actorUser.status != null and log.actorUser.status.name() == 'INACTIVE'}" class="text-danger small">(deactivated)</span>
                                 </strong>
                                 <div class="text-muted small" th:text="${log.actorFullNameSnapshot}">Quản trị viên</div>
                             </div>
@@ -92,7 +92,7 @@
                             <span class="text-dark fw-medium" th:text="${log.description}">Chi tiết hoạt động</span>
                         </td>
                         <td class="font-monospace text-secondary small" th:text="${log.ipAddress != null ? log.ipAddress : '-'}">127.0.0.1</td>
-                        <td class="pe-3 small text-muted" th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss', 'Asia/Ho_Chi_Minh') : '-'}">Thời gian</td>
+                        <td class="pe-3 small text-muted" th:text="${log.createdAt}">Thời gian</td>
                     </tr>
                 </tbody>
             </table>
