@@ -439,3 +439,22 @@ a:hover {
     color: var(--accent-hover);
     text-decoration: underline;
 }
+
+/* Custom OTP and Utility Classes (replaces inline styles) */
+.otp-input {
+    text-align: center;
+    letter-spacing: 0.5rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 0.5rem;
+}
+
+.alert-info-custom {
+    background-color: #f0fdfa;
+    border-color: #ccfbf1;
+    color: #0f766e;
+}
+
+.form-group-no-margin {
+    margin-bottom: 0;
+}
