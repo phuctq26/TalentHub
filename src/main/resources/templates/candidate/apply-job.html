@@ -1,48 +1,121 @@
-<!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Apply Job</title>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, 'Apply Job', 'candidate-jobs')}">
 <body>
-<header>
-    <nav>
-        <a th:href="@{/jobs}">View Jobs</a>
-    </nav>
-</header>
+<main th:fragment="main-content">
 
-<main>
-    <p th:if="${error}" th:text="${error}"></p>
+    <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-outline-secondary mb-4">
+        <i class="bi bi-arrow-left me-1"></i> Back to Job Detail
+    </a>
 
-    <form th:action="@{/jobs/{id}/apply(id=${job.id})}" method="post" enctype="multipart/form-data">
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Unable to submit application.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
         <div>
-            <label>Job Title</label>
-            <input type="text" th:value="${job.title}" readonly>
+            <h2 class="mb-1 fw-bold text-dark">Submit Application</h2>
+            <p class="text-muted mb-0">Upload your CV and send your application for this job posting.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-briefcase text-primary me-1"></i> Job Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h5 class="fw-bold text-dark mb-3" th:text="${job.title}">Java Developer</h5>
+                    <div class="detail-item mb-3">
+                        <div class="detail-label">Department</div>
+                        <div class="detail-value" th:text="${job.department}">Engineering</div>
+                    </div>
+                    <div class="detail-item mb-3">
+                        <div class="detail-label">Location</div>
+                        <div class="detail-value" th:text="${job.location}">Hanoi</div>
+                    </div>
+                    <div class="detail-item mb-3">
+                        <div class="detail-label">Salary range</div>
+                        <div class="detail-value"
+                             th:text="${job.salaryRange != null && !#strings.isEmpty(job.salaryRange) ? job.salaryRange : 'Negotiable'}">
+                            Negotiable
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Application deadline</div>
+                        <div class="detail-value"
+                             th:text="${job.applicationDeadline != null ? #temporals.format(job.applicationDeadline, 'dd/MM/yyyy') : 'Open'}">
+                            Open
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div>
-            <label>Candidate Name</label>
-            <input type="text" th:value="${candidate.fullName}" readonly>
-        </div>
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-file-earmark-arrow-up text-primary me-1"></i> Application Form
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/jobs/{id}/apply(id=${job.id})}" method="post" enctype="multipart/form-data">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="candidateName" class="form-label">Candidate Name</label>
+                                <input id="candidateName"
+                                       type="text"
+                                       class="form-control"
+                                       th:value="${candidate.fullName}"
+                                       readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="candidateEmail" class="form-label">Email</label>
+                                <input id="candidateEmail"
+                                       type="email"
+                                       class="form-control"
+                                       th:value="${candidate.email}"
+                                       readonly>
+                            </div>
+                            <div class="col-12">
+                                <label for="cvFile" class="form-label">CV File</label>
+                                <input id="cvFile"
+                                       type="file"
+                                       name="cvFile"
+                                       class="form-control"
+                                       accept=".pdf,.doc,.docx"
+                                       required>
+                                <div class="form-text">Accepted formats: PDF, DOC, DOCX. Maximum size: 5MB.</div>
+                            </div>
+                            <div class="col-12">
+                                <label for="coverLetter" class="form-label">Cover Letter</label>
+                                <textarea id="coverLetter"
+                                          name="coverLetter"
+                                          rows="8"
+                                          class="form-control"
+                                          placeholder="Write a short message for the recruiter..."
+                                          th:text="${coverLetter}"></textarea>
+                            </div>
+                        </div>
 
-        <div>
-            <label>Email</label>
-            <input type="email" th:value="${candidate.email}" readonly>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-1"></i> Submit Application
+                            </button>
+                            <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div>
-            <label>CV File</label>
-            <input type="file" name="cvFile" accept=".pdf,.doc,.docx" required>
-        </div>
-
-        <div>
-            <label>Cover Letter</label>
-            <textarea name="coverLetter" rows="8" th:text="${coverLetter}"></textarea>
-        </div>
-
-        <button type="submit">Submit</button>
-        <a th:href="@{/jobs/{id}(id=${job.id})}">Cancel</a>
-    </form>
 </main>
 </body>
 </html>

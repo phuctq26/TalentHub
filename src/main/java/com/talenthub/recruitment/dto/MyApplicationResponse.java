@@ -11,7 +11,7 @@ public class MyApplicationResponse {
     private Long applicationId;
     private Long jobId;
     private String jobTitle;
-    private String companyName;
+    private String department;
     private Instant appliedAt;
     private String status;
     private Instant updatedAt;
@@ -27,7 +27,7 @@ public class MyApplicationResponse {
         response.setApplicationId(application.getId());
         response.setJobId(job != null ? job.getId() : null);
         response.setJobTitle(job != null ? job.getTitle() : "N/A");
-        response.setCompanyName("N/A");
+        response.setDepartment(job != null ? job.getDepartment() : "N/A");
         response.setAppliedAt(application.getSubmittedAt());
         response.setStatus(application.getStatus() != null ? application.getStatus().name() : "N/A");
         response.setUpdatedAt(application.getStatusChangedAt());
@@ -62,12 +62,12 @@ public class MyApplicationResponse {
         this.jobTitle = jobTitle;
     }
 
-    public String getCompanyName() {
-        return companyName;
+    public String getDepartment() {
+        return department;
     }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
+    public void setDepartment(String department) {
+        this.department = department;
     }
 
     public Instant getAppliedAt() {

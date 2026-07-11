@@ -47,7 +47,7 @@
                 <thead class="table-light">
                 <tr>
                     <th class="ps-3" style="min-width: 220px;">Job Title</th>
-                    <th>Company</th>
+                    <th>Department</th>
                     <th>Applied Date</th>
                     <th>Status</th>
                     <th>CV</th>
@@ -61,7 +61,7 @@
                     <td class="ps-3">
                         <div class="fw-bold text-dark" th:text="${app.jobTitle}">Java Developer</div>
                     </td>
-                    <td th:text="${app.companyName}">N/A</td>
+                    <td th:text="${app.department}">Engineering</td>
                     <td class="text-secondary small"
                         th:text="${app.appliedAt != null ? #temporals.format(app.appliedAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">
                         10/07/2026
