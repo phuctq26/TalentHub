@@ -36,7 +36,7 @@
                                         class="text-danger">*</span></label>
                                 <input type="text" th:field="*{username}" id="username" class="form-control"
                                     th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
-                                    placeholder="Nhập tên tài khoản">
+                                    placeholder="Nhập tên tài khoản" th:readonly="${isEdit}">
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}"
                                     th:errors="*{username}"></div>
                             </div>
@@ -54,15 +54,13 @@
 
                             <!-- Role -->
                             <div class="mb-3">
-                                <label for="role" class="form-label fw-semibold">Role <span
-                                        class="text-danger">*</span></label>
+                                <label for="role" class="form-label fw-semibold">Role <span class="text-danger">*</span></label>
                                 <select th:field="*{roleId}" id="role" class="form-select"
-                                    th:classappend="${#fields.hasErrors('roleId')} ? 'is-invalid' : ''">
+                                        th:classappend="${#fields.hasErrors('roleId')} ? 'is-invalid' : ''">
                                     <option value="">Chọn vai trò</option>
                                     <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.name}"></option>
                                 </select>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('roleId')}"
-                                    th:errors="*{roleId}"></div>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('roleId')}" th:errors="*{roleId}"></div>
                             </div>
 
                             <!-- Initial Password -->
