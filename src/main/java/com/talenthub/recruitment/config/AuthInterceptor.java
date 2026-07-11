@@ -12,8 +12,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Object handler) throws Exception {
+            HttpServletResponse response,
+            Object handler) throws Exception {
         String path = request.getRequestURI();
         // Các đường dẫn công khai — không cần đăng nhập
         if (isPublicPath(path)) {
@@ -25,23 +25,18 @@ public class AuthInterceptor implements HandlerInterceptor {
                 : null;
         // Chưa đăng nhập → về trang login
         if (currentUser == null) {
-            System.out.println("[AuthInterceptor] No user in session for path: " + path);
             response.sendRedirect("/login");
             return false;
         }
         // Kiểm tra phân quyền theo prefix URL
         String roleName = currentUser.getRole().getName();
-        boolean permitted = hasPermission(UserRole.valueOf(roleName), path);
-        System.out.println(String.format(
-            "[AuthInterceptor] User: %s | Role: %s | Path: %s | Permitted: %b",
-            currentUser.getUsername(), roleName, path, permitted
-        ));
-        if (!permitted) {
+        if (!hasPermission(UserRole.valueOf(roleName), path)) {
             response.sendError(403, "Forbidden");
             return false;
         }
         return true; // có quyền → cho đi tiếp
     }
+
     private boolean isPublicPath(String path) {
         return path.startsWith("/login")
                 || path.startsWith("/logout")
@@ -50,11 +45,12 @@ public class AuthInterceptor implements HandlerInterceptor {
                 || path.startsWith("/verify-otp")
                 || path.startsWith("/reset-password")
                 || path.startsWith("/error")
-                || path.startsWith("/jobs")       // Public Job List SCR-13
+                || path.startsWith("/jobs") // Public Job List SCR-13
                 || path.startsWith("/css")
                 || path.startsWith("/js")
                 || path.startsWith("/images");
     }
+
     private boolean hasPermission(UserRole role, String path) {
         switch (role) {
             case ADMIN:
