@@ -24,13 +24,14 @@
         </p>
 
         <!-- Information message -->
-        <div th:if="${infoMessage}" class="alert alert-warning" role="alert" style="background-color: #f0fdfa; border-color: #ccfbf1; color: #0f766e;">
-            📢 <span th:text="${infoMessage}"></span>
+        <div th:if="${infoMessage}" class="alert alert-warning" role="alert"
+            style="background-color: #f0fdfa; border-color: #ccfbf1; color: #0f766e;">
+            <span th:text="${infoMessage}"></span>
         </div>
 
         <!-- Error Alerts -->
         <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
-            ❌ <span th:text="${errorMessage}"></span>
+            <span th:text="${errorMessage}"></span>
         </div>
 
         <!-- Form -->
@@ -40,17 +41,10 @@
 
             <div class="form-group">
                 <label class="form-label" for="otp">Mã xác nhận (OTP)</label>
-                <input type="text"
-                       id="otp"
-                       name="otp"
-                       class="form-control"
-                       placeholder="Nhập 6 chữ số"
-                       required
-                       maxlength="6"
-                       pattern="\d{6}"
-                       inputmode="numeric"
-                       style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: bold; padding: 0.5rem;"
-                       autocomplete="one-time-code">
+                <input type="text" id="otp" name="otp" class="form-control" placeholder="Nhập 6 chữ số" required
+                    maxlength="6" pattern="\d{6}" inputmode="numeric"
+                    style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: bold; padding: 0.5rem;"
+                    autocomplete="one-time-code">
             </div>
 
             <div class="form-group" style="margin-bottom: 0;">
