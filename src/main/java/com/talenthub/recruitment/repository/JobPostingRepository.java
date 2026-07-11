@@ -95,4 +95,12 @@ public interface JobPostingRepository extends JpaRepository<JobPosting, Long> {
 
   @Query(value = "SELECT * FROM job_postings WHERE CAST(status AS TEXT) = 'ACTIVE' AND (:hrManagerId IS NULL OR created_by_id = :hrManagerId) ORDER BY published_at DESC, created_at DESC", nativeQuery = true)
   List<JobPosting> findActiveJobsForHrOrAdmin(@Param("hrManagerId") Long hrManagerId);
+
+  @Query(value = """
+      SELECT *
+      FROM job_postings
+      WHERE (:hrManagerId IS NULL OR created_by_id = :hrManagerId)
+      ORDER BY updated_at DESC NULLS LAST, created_at DESC
+      """, nativeQuery = true)
+  List<JobPosting> findReportJobsForHrOrAdmin(@Param("hrManagerId") Long hrManagerId);
 }
