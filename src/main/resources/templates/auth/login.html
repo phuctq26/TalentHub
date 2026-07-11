@@ -17,6 +17,10 @@
             Try again in 10 minutes or contact your administrator.
         </div>
 
+        <div th:if="${successMessage}" role="alert" style="color: green; padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 15px;">
+            <span th:text="${successMessage}"></span>
+        </div>
+
         <div th:if="${genericError}" role="alert">
             Incorrect username or password.
         </div>
