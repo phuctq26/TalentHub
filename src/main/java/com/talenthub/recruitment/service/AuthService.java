@@ -105,4 +105,23 @@ public class AuthService {
         public User getUser() { return user; }
         public void setUser(User user) { this.user = user; }
     }
+
+    /**
+     * Bước 3 của forgot-password flow:
+     * Hash mật khẩu mới bằng BCrypt, lưu DB, xóa sạch OTP.
+     */
+    @Transactional
+    public void resetPassword(String email, String newRawPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy user: " + email));
+
+        // Dùng lại BCrypt encoder có sẵn để hash mật khẩu mới
+        user.setPasswordHash(passwordEncoder.encode(newRawPassword));
+
+        // Xóa OTP để không thể dùng lại
+        user.setOtp(null);
+        user.setExpTime(null);
+
+        userRepository.save(user);
+    }
 }
