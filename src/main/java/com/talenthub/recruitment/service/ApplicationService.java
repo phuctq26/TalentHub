@@ -8,6 +8,10 @@ import com.talenthub.recruitment.entity.User;
 import com.talenthub.recruitment.entity.enums.ApplicationStatus;
 import com.talenthub.recruitment.repository.ApplicationRepository;
 import com.talenthub.recruitment.repository.InterviewRepository;
+import com.talenthub.recruitment.entity.ApplicationNote;
+import com.talenthub.recruitment.repository.ApplicationNoteRepository;
+import com.talenthub.recruitment.repository.UserRepository;
+import java.util.List;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -41,15 +45,21 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final InterviewRepository interviewRepository;
     private final PublicJobService publicJobService;
+    private final ApplicationNoteRepository applicationNoteRepository;
+    private final UserRepository userRepository;
 
     public ApplicationService(
             ApplicationRepository applicationRepository,
             InterviewRepository interviewRepository,
-            PublicJobService publicJobService
+            PublicJobService publicJobService,
+            ApplicationNoteRepository applicationNoteRepository,
+            UserRepository userRepository
     ) {
         this.applicationRepository = applicationRepository;
         this.interviewRepository = interviewRepository;
         this.publicJobService = publicJobService;
+        this.applicationNoteRepository = applicationNoteRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
@@ -209,5 +219,92 @@ public class ApplicationService {
         } catch (IOException ex) {
             throw new IllegalStateException("Could not save CV file.", ex);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Application> getApplications(Long jobId, String status, int page, int size, Long hrManagerId) {
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
+        return applicationRepository.findByJobIdAndStatus(jobId, hrManagerId, status, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Application getApplicationById(Long id) {
+        return applicationRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Không tìm thấy hồ sơ ứng tuyển"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ApplicationNote> getNotes(Long applicationId) {
+        return applicationNoteRepository.findByApplication_IdOrderByCreatedAtDesc(applicationId);
+    }
+
+    @Transactional
+    public void addNote(Long applicationId, User author, String content) {
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("Nội dung ghi chú không được để trống.");
+        }
+        Application application = getApplicationById(applicationId);
+        ApplicationNote note = new ApplicationNote();
+        note.setApplication(application);
+        note.setAuthor(author);
+        note.setNoteContent(content);
+        applicationNoteRepository.save(note);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Interview> getInterviews(Long applicationId) {
+        return interviewRepository.findByApplication_IdOrderByScheduledAtDesc(applicationId);
+    }
+
+    @Transactional
+    public void changeStatus(Long applicationId, ApplicationStatus newStatus) {
+        Application application = getApplicationById(applicationId);
+        application.setStatus(newStatus);
+        application.setStatusChangedAt(Instant.now());
+        applicationRepository.save(application);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Interview> getInterviewerInterviews(Long interviewerId) {
+        return interviewRepository.findByInterviewerId(interviewerId);
+    }
+
+    @Transactional(readOnly = true)
+    public CandidateCvFile getCvForHrOrInterviewer(Long applicationId, Long userId, String role) {
+        Application application = getApplicationById(applicationId);
+
+        // Kiểm tra bảo mật cho HR Manager: Chỉ cho phép tải CV nếu công việc này thuộc quyền quản lý của họ
+        if ("HR_MANAGER".equalsIgnoreCase(role)) {
+            Long creatorId = application.getJob().getCreatedBy().getId();
+            if (!creatorId.equals(userId)) {
+                throw new ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Access denied");
+            }
+        }
+        // Kiểm tra bảo mật cho Interviewer: Chỉ cho phép tải CV nếu được phân công phỏng vấn ứng viên này
+        else if ("INTERVIEWER".equalsIgnoreCase(role)) {
+            List<Interview> interviews = getInterviews(applicationId);
+            boolean assigned = false;
+            for (Interview i : interviews) {
+                if (i.getInterviewer().getId().equals(userId)) {
+                    assigned = true;
+                    break;
+                }
+            }
+            if (!assigned) {
+                throw new ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Access denied");
+            }
+        }
+
+        // Lấy đường dẫn tệp CV trên ổ đĩa
+        Path cvPath = Paths.get(application.getCvStoragePath()).toAbsolutePath().normalize();
+        if (!Files.exists(cvPath) || !Files.isReadable(cvPath)) {
+            throw new ResponseStatusException(NOT_FOUND, "Không tìm thấy tệp CV");
+        }
+
+        return new CandidateCvFile(
+                new FileSystemResource(cvPath),
+                application.getCvFileName(),
+                application.getCvContentType()
+        );
     }
 }

@@ -186,4 +186,11 @@ public class Application {
     public void setCoverLetter(String coverLetter) {
         this.coverLetter = coverLetter;
     }
+
+    public long getDaysInStage() {
+        if (statusChangedAt == null) {
+            return 0;
+        }
+        return java.time.temporal.ChronoUnit.DAYS.between(statusChangedAt, java.time.Instant.now());
+    }
 }
