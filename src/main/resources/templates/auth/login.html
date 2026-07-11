@@ -24,10 +24,10 @@
 
                     <!-- Error Alerts -->
                     <div th:if="${lockoutError}" class="alert alert-danger" role="alert">
-                        ⚠️ Tài khoản bị khóa tạm thời do đăng nhập sai quá nhiều lần. Vui lòng thử lại sau 10 phút.
+                        Tài khoản bị khóa tạm thời do đăng nhập sai quá nhiều lần. Vui lòng thử lại sau 10 phút.
                     </div>
                     <div th:if="${genericError}" class="alert alert-danger" role="alert">
-                        ❌ Tên đăng nhập hoặc mật khẩu không đúng.
+                        Tên đăng nhập hoặc mật khẩu không đúng.
                     </div>
 
                     <form th:action="@{/login}" method="post">
@@ -35,27 +35,18 @@
                         <!-- Username / Email -->
                         <div class="form-group">
                             <label class="form-label" for="usernameOrEmail">Tên đăng nhập hoặc Email</label>
-                            <input type="text"
-                                   id="usernameOrEmail"
-                                   name="usernameOrEmail"
-                                   class="form-control"
-                                   placeholder="Nhập tên đăng nhập hoặc email"
-                                   required
-                                   autocomplete="username">
+                            <input type="text" id="usernameOrEmail" name="usernameOrEmail" class="form-control"
+                                placeholder="Nhập tên đăng nhập hoặc email" required autocomplete="username">
                         </div>
 
                         <!-- Password -->
                         <div class="form-group">
                             <label class="form-label" for="password">Mật khẩu</label>
                             <div class="password-input-group">
-                                <input type="password"
-                                       id="password"
-                                       name="password"
-                                       class="form-control"
-                                       placeholder="Nhập mật khẩu"
-                                       required
-                                       autocomplete="current-password">
-                                <button type="button" class="toggle-password-btn" onclick="togglePassword()" title="Hiện/ẩn mật khẩu">👁</button>
+                                <input type="password" id="password" name="password" class="form-control"
+                                    placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                                <button type="button" class="toggle-password-btn" onclick="togglePassword()"
+                                    title="Hiện/ẩn mật khẩu">👁</button>
                             </div>
                         </div>
 
