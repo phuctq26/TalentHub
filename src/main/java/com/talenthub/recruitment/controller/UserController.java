@@ -77,7 +77,7 @@ public class UserController {
     public String editUserForm(@PathVariable Long id, Model model) {
         UserForm form = userService.getFormById(id);
         model.addAttribute("userForm", form);
-        model.addAttribute("roles", getManageableRoles());
+        model.addAttribute("roles", roleRepository.findAll());
         model.addAttribute("statuses", AccountStatus.values());
         model.addAttribute("isEdit", true);
         return "admin/user-form";
@@ -90,13 +90,24 @@ public class UserController {
             Model model,
             RedirectAttributes redirectAttributes) {
 
-        // Validate password required on create
-        if (form.getId() == null && (form.getPassword() == null || form.getPassword().trim().isEmpty())) {
-            result.rejectValue("password", "NotEmpty", "Mật khẩu không được để trống khi tạo mới.");
+        // Validate password on Create (Required + Complexity)
+        if (form.getId() == null) {
+            if (form.getPassword() == null || form.getPassword().trim().isEmpty()) {
+                result.rejectValue("password", "NotEmpty", "Mật khẩu không được để trống khi tạo mới.");
+            } else if (!form.getPassword().matches("^(?=.*[0-9])(?=.*[A-Z]).{8,}$")) {
+                result.rejectValue("password", "Pattern", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa và 1 chữ số.");
+            }
+        } else {
+            // Validate password on Edit (Optional + Complexity if not blank)
+            if (form.getPassword() != null && !form.getPassword().trim().isEmpty()) {
+                if (!form.getPassword().matches("^(?=.*[0-9])(?=.*[A-Z]).{8,}$")) {
+                    result.rejectValue("password", "Pattern", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa và 1 chữ số.");
+                }
+            }
         }
 
         if (result.hasErrors()) {
-            model.addAttribute("roles", getManageableRoles());
+            model.addAttribute("roles", form.getId() != null ? roleRepository.findAll() : getManageableRoles());
             model.addAttribute("statuses", AccountStatus.values());
             model.addAttribute("isEdit", form.getId() != null);
             return "admin/user-form";
@@ -106,8 +117,13 @@ public class UserController {
             userService.save(form);
             redirectAttributes.addFlashAttribute("successMessage", "Lưu thông tin người dùng thành công!");
         } catch (Exception e) {
-            result.rejectValue("username", "Duplicate", e.getMessage());
-            model.addAttribute("roles", getManageableRoles());
+            String msg = e.getMessage();
+            if (msg != null && msg.contains("Email")) {
+                result.rejectValue("email", "Duplicate", msg);
+            } else {
+                result.rejectValue("username", "Duplicate", msg);
+            }
+            model.addAttribute("roles", form.getId() != null ? roleRepository.findAll() : getManageableRoles());
             model.addAttribute("statuses", AccountStatus.values());
             model.addAttribute("isEdit", form.getId() != null);
             return "admin/user-form";
@@ -124,7 +140,7 @@ public class UserController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể mở khóa tài khoản: " + e.getMessage());
         }
-        return "redirect:/admin/users";
+        return "redirect:/admin/users?status=ACTIVE";
     }
 
     @PostMapping("/{id}/activate")
@@ -135,7 +151,7 @@ public class UserController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể kích hoạt tài khoản: " + e.getMessage());
         }
-        return "redirect:/admin/users";
+        return "redirect:/admin/users?status=ACTIVE";
     }
 
     @PostMapping("/{id}/deactivate")
@@ -146,7 +162,7 @@ public class UserController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể vô hiệu hóa tài khoản: " + e.getMessage());
         }
-        return "redirect:/admin/users";
+        return "redirect:/admin/users?status=INACTIVE";
     }
 
     @GetMapping("/{id}")

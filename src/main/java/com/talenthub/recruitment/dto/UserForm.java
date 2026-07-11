@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 
 public class UserForm {
 
@@ -16,7 +17,7 @@ public class UserForm {
     private String fullName;
 
     @NotBlank(message = "Tên đăng nhập không được để trống")
-    @Size(min = 4, max = 50, message = "Tên đăng nhập từ 4 đến 50 ký tự")
+    @Pattern(regexp = "^[a-zA-Z0-9_]{4,50}$", message = "Tên đăng nhập phải từ 4-50 ký tự và chỉ chứa chữ cái, chữ số và dấu gạch dưới")
     private String username;
 
     @NotBlank(message = "Email không được để trống")
