@@ -17,10 +17,6 @@ public interface JobPostingService {
             JobStatus status,
             String department
     );
-    JobPosting saveDraft(JobPostingForm form);
-
-    JobPosting saveAndPublish(JobPostingForm form);
-
     JobPosting findById(Long id);
 
     JobPostingForm getFormById(Long id);

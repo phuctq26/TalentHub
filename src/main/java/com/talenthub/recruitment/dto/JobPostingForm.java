@@ -15,7 +15,7 @@ public class JobPostingForm {
     private String title;
 
     @NotBlank(message = "Phòng ban không được để trống.")
-    @Size(max = 200, message = "Phòng ban tối đa 100 ký tự")
+    @Size(max = 100, message = "Phòng ban tối đa 100 ký tự.")
     private String department;
 
     @NotBlank(message = "Địa điểm làm việc không được để trống.")
