@@ -1,0 +1,169 @@
+/* ==========================================================================
+   Assign Interview Page Stylesheet — TalentHub
+   ========================================================================== */
+
+/* Page variables */
+:root {
+    --primary-color: #1e293b;
+    --primary-light: #334155;
+    --accent-color: #0f766e;
+    --accent-hover: #115e59;
+    --border-color: #e2e8f0;
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-color: #0f172a;
+    --text-muted: #64748b;
+    --danger-color: #ef4444;
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --radius-md: 12px;
+    --radius-sm: 6px;
+}
+
+/* Container limits */
+.schedule-container {
+    max-width: 650px;
+    margin: 1.5rem auto;
+}
+
+/* Card Design */
+.schedule-card {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+/* Context Header styling */
+.context-header {
+    background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+    border: 1px solid #99f6e4;
+    border-radius: var(--radius-sm);
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.context-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.context-candidate {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.context-job {
+    font-size: 0.95rem;
+    color: var(--primary-light);
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+/* Form Styles */
+.form-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1.25rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+    outline: none;
+}
+
+.input-feedback-error {
+    color: var(--danger-color);
+    font-size: 0.825rem;
+    margin-top: 0.35rem;
+    font-weight: 500;
+}
+
+/* Warnings and Notices */
+.notice-banner {
+    background-color: #fffbeb;
+    border: 1px solid #fef3c7;
+    color: #b45309;
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Footer buttons grid */
+.form-buttons-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* Button stylings */
+.btn-schedule-primary {
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border: 1px solid transparent;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    text-align: center;
+    cursor: pointer;
+}
+
+.btn-schedule-primary:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+    color: #ffffff;
+}
+
+.btn-schedule-primary:disabled {
+    background-color: #cbd5e1;
+    border-color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.btn-schedule-secondary {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--primary-light);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn-schedule-secondary:hover {
+    background-color: var(--bg-color);
+    color: var(--primary-color);
+}
