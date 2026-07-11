@@ -3,51 +3,123 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>User Login — TalentHub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập — TalentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .login-wrapper {
+            max-width: 440px;
+            margin: 0 auto;
+        }
+        .login-logo {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .password-input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-input-group .form-control {
+            padding-right: 3rem;
+        }
+        .toggle-password-btn {
+            position: absolute;
+            right: 0.75rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            padding: 0;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+        .toggle-password-btn:hover {
+            color: var(--accent-color);
+        }
+        .login-divider {
+            border-top: 1px solid var(--border-color);
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+        }
+    </style>
 </head>
 
 <body>
-    <div>
-        <img th:src="@{/images/logo.png}" alt="TalentHub Logo">
+    <main class="main-content">
+        <div class="container">
+            <div class="login-wrapper">
 
-        <h1>User Login to TalentHub</h1>
+                <!-- Logo / Branding -->
+                <div class="login-logo">
+                    <a th:href="@{/}" class="logo">TalentHub</a>
+                    <p class="subtitle" style="margin-top: 0.5rem;">Đăng nhập vào tài khoản của bạn</p>
+                </div>
 
-        <div th:if="${lockoutError}" role="alert" style="color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-weight: bold;">
-            ⚠️ Your account has been temporarily locked after too many failed attempts. Try again in 10 minutes.
-        </div>
+                <!-- Login Card -->
+                <div class="card">
 
-        <div th:if="${genericError}" role="alert" style="color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-weight: bold;">
-            ❌ Incorrect username or password.
-        </div>
+                    <!-- Error Alerts -->
+                    <div th:if="${lockoutError}" class="alert alert-danger" role="alert">
+                        ⚠️ Tài khoản bị khóa tạm thời do đăng nhập sai quá nhiều lần. Vui lòng thử lại sau 10 phút.
+                    </div>
+                    <div th:if="${genericError}" class="alert alert-danger" role="alert">
+                        ❌ Tên đăng nhập hoặc mật khẩu không đúng.
+                    </div>
 
-        <form th:action="@{/login}" method="post">
-            <div>
-                <label for="usernameOrEmail">Username or email</label>
-                <input type="text" id="usernameOrEmail" name="usernameOrEmail" required autocomplete="username">
-            </div>
+                    <form th:action="@{/login}" method="post">
 
-            <div>
-                <label for="password">Password</label>
-                <div>
-                    <input type="password" id="password" name="password" required autocomplete="current-password">
-                    <button type="button" onclick="togglePassword()">👁</button>
+                        <!-- Username / Email -->
+                        <div class="form-group">
+                            <label class="form-label" for="usernameOrEmail">Tên đăng nhập hoặc Email</label>
+                            <input type="text"
+                                   id="usernameOrEmail"
+                                   name="usernameOrEmail"
+                                   class="form-control"
+                                   placeholder="Nhập tên đăng nhập hoặc email"
+                                   required
+                                   autocomplete="username">
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group">
+                            <label class="form-label" for="password">Mật khẩu</label>
+                            <div class="password-input-group">
+                                <input type="password"
+                                       id="password"
+                                       name="password"
+                                       class="form-control"
+                                       placeholder="Nhập mật khẩu"
+                                       required
+                                       autocomplete="current-password">
+                                <button type="button" class="toggle-password-btn" onclick="togglePassword()" title="Hiện/ẩn mật khẩu">👁</button>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="form-group" style="margin-bottom: 0; margin-top: 1.5rem;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem;">
+                                Đăng nhập
+                            </button>
+                        </div>
+
+                    </form>
+
+                    <!-- Footer Links -->
+                    <div class="login-divider text-center">
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">
+                            Chưa có tài khoản? <a th:href="@{/register}">Đăng ký ngay</a>
+                        </p>
+                        <p style="font-size: 0.9rem; margin-top: 0.5rem;">
+                            <a th:href="@{/forgot-password}">Quên mật khẩu?</a>
+                        </p>
+                    </div>
+
                 </div>
             </div>
-
-            <button type="submit">
-                User Login
-            </button>
-        </form>
-
-        <p>
-            Don't have an account?
-            <a th:href="@{/register}">Create an account</a>
-        </p>
-
-        <p>
-            <a th:href="@{/forgot-password}">Forgot password?</a>
-        </p>
-    </div>
+        </div>
+    </main>
 
     <script>
         function togglePassword() {
