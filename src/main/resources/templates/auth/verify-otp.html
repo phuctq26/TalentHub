@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác minh OTP — TalentHub</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body class="forgot-password-body">
+
+    <div class="forgot-card">
+
+        <!-- Logo Area -->
+        <div class="forgot-logo-area">
+            <span class="logo">TalentHub</span>
+        </div>
+
+        <!-- Title & Subtitle -->
+        <h2 class="forgot-title">Xác minh mã OTP</h2>
+        <p class="forgot-desc">
+            Vui lòng nhập mã xác nhận 6 chữ số đã được gửi đến email của bạn.
+        </p>
+
+        <!-- Information message -->
+        <div th:if="${infoMessage}" class="alert alert-warning" role="alert" style="background-color: #f0fdfa; border-color: #ccfbf1; color: #0f766e;">
+            📢 <span th:text="${infoMessage}"></span>
+        </div>
+
+        <!-- Error Alerts -->
+        <div th:if="${errorMessage}" class="alert alert-danger" role="alert">
+            ❌ <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Form -->
+        <form th:action="@{/verify-otp}" method="post">
+
+            <input type="hidden" name="email" th:value="${email}">
+
+            <div class="form-group">
+                <label class="form-label" for="otp">Mã xác nhận (OTP)</label>
+                <input type="text"
+                       id="otp"
+                       name="otp"
+                       class="form-control"
+                       placeholder="Nhập 6 chữ số"
+                       required
+                       maxlength="6"
+                       pattern="\d{6}"
+                       inputmode="numeric"
+                       style="text-align: center; letter-spacing: 0.5rem; font-size: 1.5rem; font-weight: bold; padding: 0.5rem;"
+                       autocomplete="one-time-code">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <button type="submit" class="btn btn-primary forgot-submit-btn">
+                    Xác nhận
+                </button>
+            </div>
+
+        </form>
+
+        <!-- Back to login link -->
+        <a th:href="@{/forgot-password}" class="forgot-back-link">
+            Yêu cầu gửi lại mã
+        </a>
+
+    </div>
+
+</body>
+
+</html>
