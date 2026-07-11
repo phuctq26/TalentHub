@@ -25,10 +25,12 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final RoleRepository roleRepository;
+    private final com.talenthub.recruitment.repository.AuditLogRepository auditLogRepository;
 
-    public UserController(UserService userService, RoleRepository roleRepository) {
+    public UserController(UserService userService, RoleRepository roleRepository, com.talenthub.recruitment.repository.AuditLogRepository auditLogRepository) {
         this.userService = userService;
         this.roleRepository = roleRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     private List<Role> getManageableRoles() {
@@ -103,7 +105,18 @@ public class UserController {
         }
 
         try {
+            boolean isNewUser = (form.getId() == null);
             userService.save(form);
+            
+            if (isNewUser) {
+                com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+                log.setActorUsernameSnapshot("admin");
+                log.setActorFullNameSnapshot("System Admin");
+                log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.ACCOUNT_CREATED);
+                log.setDescription("Admin tạo tài khoản mới: " + form.getUsername());
+                auditLogRepository.save(log);
+            }
+            
             redirectAttributes.addFlashAttribute("successMessage", "Lưu thông tin người dùng thành công!");
         } catch (Exception e) {
             result.rejectValue("username", "Duplicate", e.getMessage());
@@ -117,9 +130,20 @@ public class UserController {
     }
 
     @PostMapping("/{id}/unlock")
-    public String unlockUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String unlockUser(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         try {
+            User targetUser = userService.findById(id);
             userService.unlock(id);
+            
+            User currentUser = (User) session.getAttribute("currentUser");
+            com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+            log.setActorUser(currentUser);
+            log.setActorUsernameSnapshot(currentUser != null ? currentUser.getUsername() : "system");
+            log.setActorFullNameSnapshot(currentUser != null ? currentUser.getFullName() : "System");
+            log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.ACCOUNT_UNLOCKED);
+            log.setDescription("Mở khóa tài khoản: " + targetUser.getUsername());
+            auditLogRepository.save(log);
+            
             redirectAttributes.addFlashAttribute("successMessage", "Mở khóa tài khoản thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể mở khóa tài khoản: " + e.getMessage());
@@ -139,9 +163,20 @@ public class UserController {
     }
 
     @PostMapping("/{id}/deactivate")
-    public String deactivateUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String deactivateUser(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         try {
+            User targetUser = userService.findById(id);
             userService.deactivate(id);
+            
+            User currentUser = (User) session.getAttribute("currentUser");
+            com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+            log.setActorUser(currentUser);
+            log.setActorUsernameSnapshot(currentUser != null ? currentUser.getUsername() : "system");
+            log.setActorFullNameSnapshot(currentUser != null ? currentUser.getFullName() : "System");
+            log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.ACCOUNT_DEACTIVATED);
+            log.setDescription("Vô hiệu hóa tài khoản: " + targetUser.getUsername());
+            auditLogRepository.save(log);
+            
             redirectAttributes.addFlashAttribute("successMessage", "Vô hiệu hóa tài khoản thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể vô hiệu hóa tài khoản: " + e.getMessage());

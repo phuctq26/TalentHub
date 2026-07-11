@@ -41,6 +41,7 @@ public class AuditLog {
 
     @NotNull
     @Enumerated(EnumType.STRING)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NAMED_ENUM)
     @Column(name = "event_type", nullable = false, columnDefinition = "audit_event_type")
     private AuditEventType eventType;
 
@@ -48,6 +49,7 @@ public class AuditLog {
     @Column(nullable = false, columnDefinition = "text")
     private String description;
 
+    @org.hibernate.annotations.ColumnTransformer(write = "CAST(? AS inet)")
     @Column(name = "ip_address", columnDefinition = "inet")
     private String ipAddress;
 

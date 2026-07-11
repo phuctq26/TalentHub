@@ -60,6 +60,7 @@ public class User {
 
     @NotNull
     @Enumerated(EnumType.STRING)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NAMED_ENUM)
     @Column(nullable = false, columnDefinition = "account_status")
     private AccountStatus status = AccountStatus.ACTIVE;
 

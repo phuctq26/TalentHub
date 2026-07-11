@@ -94,16 +94,51 @@ public class AdminDashboardController {
     @GetMapping("/audit-log")
     public String viewAuditLogs(
             @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) String actor,
+            @RequestParam(required = false) String dateFrom,
+            @RequestParam(required = false) String dateTo,
             HttpSession session,
             Model model) {
+
+        java.time.LocalDate parsedDateFrom = null;
+        java.time.LocalDate parsedDateTo = null;
+
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+            try {
+                parsedDateFrom = java.time.LocalDate.parse(dateFrom);
+            } catch (Exception e) {
+                // Ignore parse errors
+            }
+        }
+
+        if (dateTo != null && !dateTo.trim().isEmpty()) {
+            try {
+                parsedDateTo = java.time.LocalDate.parse(dateTo);
+            } catch (Exception e) {
+                // Ignore parse errors
+            }
+        }
+
+        org.springframework.data.jpa.domain.Specification<AuditLog> spec =
+                com.talenthub.recruitment.repository.AuditLogSpecification.getFilterSpecification(
+                        eventType, actor, parsedDateFrom, parsedDateTo);
+
         Page<AuditLog> logPage = auditLogRepository.findAll(
-                PageRequest.of(page, 20, Sort.by("createdAt").descending())
+                spec,
+                PageRequest.of(page, 50, Sort.by("createdAt").descending())
         );
 
         model.addAttribute("logs", logPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", logPage.getTotalPages());
         model.addAttribute("totalItems", logPage.getTotalElements());
+
+        // Keep filters in UI
+        model.addAttribute("selectedEventType", eventType);
+        model.addAttribute("selectedActor", actor);
+        model.addAttribute("selectedDateFrom", dateFrom);
+        model.addAttribute("selectedDateTo", dateTo);
 
         return "admin/audit-log";
     }
