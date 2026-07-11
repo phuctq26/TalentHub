@@ -156,4 +156,25 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
             @Param("jobId") Long jobId,
             Pageable pageable
     );
+
+    @Query(value = """
+            SELECT a.* FROM applications a
+            JOIN job_postings j ON j.id = a.job_id
+            WHERE (:jobId IS NULL OR a.job_id = :jobId)
+              AND (:hrManagerId IS NULL OR j.created_by_id = :hrManagerId)
+              AND (:statusText IS NULL OR :statusText = '' OR CAST(a.status AS TEXT) = :statusText)
+            ORDER BY a.submitted_at DESC
+            """, countQuery = """
+            SELECT COUNT(a.id) FROM applications a
+            JOIN job_postings j ON j.id = a.job_id
+            WHERE (:jobId IS NULL OR a.job_id = :jobId)
+              AND (:hrManagerId IS NULL OR j.created_by_id = :hrManagerId)
+              AND (:statusText IS NULL OR :statusText = '' OR CAST(a.status AS TEXT) = :statusText)
+            """, nativeQuery = true)
+    Page<Application> findByJobIdAndStatus(
+            @Param("jobId") Long jobId,
+            @Param("hrManagerId") Long hrManagerId,
+            @Param("statusText") String statusText,
+            Pageable pageable
+    );
 }

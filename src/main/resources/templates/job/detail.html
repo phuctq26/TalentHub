@@ -58,6 +58,11 @@
 
             <div class="d-flex gap-2 flex-wrap">
 
+                <a th:href="@{/hr/jobs/{id}/applications(id=${job.id})}"
+                   class="btn btn-primary">
+                    Danh sách ứng tuyển
+                </a>
+
                 <a th:href="@{/hr/jobs/{id}/pipeline-report(id=${job.id})}"
                    class="btn btn-outline-primary">
                     Pipeline Report
