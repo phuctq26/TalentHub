@@ -41,6 +41,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 || path.startsWith("/logout")
                 || path.startsWith("/register")
                 || path.startsWith("/forgot-password")
+                || path.startsWith("/verify-otp")
                 || path.startsWith("/reset-password")
                 || path.startsWith("/jobs")       // Public Job List SCR-13
                 || path.startsWith("/css")
