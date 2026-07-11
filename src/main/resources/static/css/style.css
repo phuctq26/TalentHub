@@ -573,3 +573,64 @@ a:hover {
     margin-right: 0.35rem;
     margin-bottom: 0.35rem;
 }
+
+/* Login Page */
+.login-wrapper {
+    max-width: 440px;
+    margin: 0 auto;
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.login-logo .subtitle {
+    margin-top: 0.5rem;
+}
+
+.password-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-group .form-control {
+    padding-right: 3rem;
+}
+
+.toggle-password-btn {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.toggle-password-btn:hover {
+    color: var(--accent-color);
+}
+
+.login-divider {
+    border-top: 1px solid var(--border-color);
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+}
+
+.login-divider p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+.login-submit {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    margin-top: 1.5rem;
+}
