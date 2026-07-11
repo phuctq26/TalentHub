@@ -1,6 +1,4 @@
-/* ================================
-   CSS Variables — Design Tokens
-   ================================ */
+/* Premium Design Theme Variables */
 :root {
     --primary-color: #1e293b;
     --primary-light: #334155;
@@ -20,11 +18,10 @@
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
+    --bs-badge-font-size: 1.00em;
 }
 
-/* ================================
-   Global Reset & Base
-   ================================ */
+/* Reset and Global Styles */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -48,10 +45,13 @@ body {
     padding: 0 1.5rem;
 }
 
-/* ================================
-   Typography
-   ================================ */
-h1, h2, h3, h4, h5, h6 {
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     color: var(--primary-color);
     font-weight: 700;
     line-height: 1.25;
@@ -68,42 +68,56 @@ a:hover {
     color: var(--accent-hover);
 }
 
-.text-center {
-    text-align: center;
+/* Header and Navigation */
+.header {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
 }
 
 .logo {
     font-size: 1.5rem;
     font-weight: 800;
     color: var(--accent-color);
+    display: flex;
+    align-items: center;
 }
 
-.subtitle {
+.nav {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav a {
     color: var(--text-muted);
-    font-size: 0.9rem;
-    margin: 0;
+    font-weight: 550;
+    font-size: 0.95rem;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid transparent;
 }
 
-/* ================================
-   Layout
-   ================================ */
-.main-content {
-    flex: 1;
-    padding: 3rem 0;
+.nav a:hover,
+.nav a.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
 }
 
-.card {
-    background-color: var(--card-bg);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    padding: 2rem;
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 2rem;
+.auth-buttons {
+    display: flex;
+    gap: 1rem;
 }
 
-/* ================================
-   Buttons
-   ================================ */
+/* Buttons */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -115,8 +129,6 @@ a:hover {
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.2s ease;
-    font-family: var(--font-family);
-    text-decoration: none;
 }
 
 .btn-primary {
@@ -139,9 +151,66 @@ a:hover {
     background-color: var(--bg-color);
 }
 
-/* ================================
-   Forms
-   ================================ */
+.btn-login {
+    color: var(--primary-color);
+}
+
+.btn-login:hover {
+    color: var(--accent-color);
+}
+
+.btn-register {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-register:hover {
+    background-color: var(--accent-hover);
+    color: white;
+}
+
+/* Main Content Layout */
+.main-content {
+    flex: 1;
+    padding: 3rem 0;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 2rem 0;
+    margin-top: auto;
+    border-top: 1px solid var(--primary-light);
+}
+
+.footer p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Cards & Layouts for lists */
+.card {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Forms styling */
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -162,7 +231,6 @@ a:hover {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
-    font-family: var(--font-family);
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -172,15 +240,18 @@ a:hover {
     box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
 }
 
-/* ================================
-   Alerts
-   ================================ */
+.form-error {
+    color: var(--danger-color);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+/* Alert Boxes */
 .alert {
     padding: 1rem;
     border-radius: var(--radius-sm);
     margin-bottom: 1.5rem;
     border: 1px solid transparent;
-    font-size: 0.9rem;
 }
 
 .alert-danger {
@@ -195,266 +266,617 @@ a:hover {
     color: #065f46;
 }
 
-.alert-warning {
-    background-color: #fffbeb;
-    border-color: #fde68a;
-    color: #92400e;
+/* User Management Table Styles */
+.table-users {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg);
+    table-layout: fixed;
 }
 
-/* ================================
-   Login Page
-   ================================ */
-.login-page {
-    min-height: 100vh;
-    display: flex;
-    align-items: stretch;
+.table-users th,
+.table-users td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: middle;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.table-users th:last-child,
+.table-users td:last-child {
+    border-right: none;
+}
+
+.table-users th {
     background-color: var(--bg-color);
+    color: var(--text-color);
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
 }
 
-/* Left: branding panel */
-.login-brand-panel {
-    display: none;
-    flex: 1;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
-    padding: 3rem;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    color: white;
+.table-users tr:nth-child(even) td {
+    background-color: #fafbfc;
 }
 
-@media (min-width: 900px) {
-    .login-brand-panel {
-        display: flex;
-    }
-}
-
-.login-brand-logo {
-    font-size: 2rem;
-    font-weight: 800;
-    color: white;
-    margin-bottom: 2.5rem;
-    letter-spacing: -0.5px;
-    text-decoration: none;
-}
-
-.login-brand-title {
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: white;
-    line-height: 1.2;
-    margin-bottom: 1rem;
-}
-
-.login-brand-desc {
-    font-size: 1rem;
-    color: rgba(255, 255, 255, 0.75);
-    line-height: 1.7;
-    max-width: 380px;
-}
-
-.login-brand-features {
-    list-style: none;
-    margin-top: 2.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-}
-
-.login-brand-features li {
-    font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.85);
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-}
-
-.login-brand-features li::before {
-    content: "✓";
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    font-size: 0.75rem;
-    font-weight: 700;
-    flex-shrink: 0;
-}
-
-/* Right: form panel (shared by login & forgot-password) */
-.login-form-panel {
-    width: 100%;
-    max-width: 520px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 3rem 2.5rem;
+.table-users tr:nth-child(odd) td {
     background-color: var(--card-bg);
 }
 
-@media (min-width: 900px) {
-    .login-form-panel {
-        padding: 4rem 3.5rem;
-    }
+.table-users tr:hover td {
+    background-color: #f1f5f9;
 }
 
-.login-form-header {
-    margin-bottom: 2rem;
+/* Column Width Definitions */
+.col-id {
+    width: 70px;
 }
 
-.login-form-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 0.4rem;
+.col-username {
+    width: 140px;
 }
 
-.login-form-subtitle {
-    font-size: 0.95rem;
-    color: var(--text-muted);
-    line-height: 1.5;
+.col-name {
+    width: 180px;
 }
 
-/* Password toggle */
-.password-input-group {
-    position: relative;
-    display: flex;
-    align-items: center;
+.col-email {
+    width: 230px;
 }
 
-.password-input-group .form-control {
-    padding-right: 3rem;
+.col-role {
+    width: 120px;
 }
 
-.toggle-password-btn {
-    position: absolute;
-    right: 0.85rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-muted);
-    font-size: 1.1rem;
-    padding: 0;
-    line-height: 1;
-    transition: color 0.2s ease;
+.col-status {
+    width: 120px;
 }
 
-.toggle-password-btn:hover {
-    color: var(--accent-color);
+.col-actions {
+    width: 240px;
 }
 
-/* Submit button full-width */
-.login-submit {
-    width: 100%;
-    padding: 0.85rem;
-    font-size: 1rem;
-    letter-spacing: 0.3px;
-}
-
-/* Footer links below form */
-.login-footer-links {
+.status-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
     text-align: center;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-}
-
-.login-footer-links p {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-}
-
-.login-footer-links p:last-child {
-    margin-bottom: 0;
-}
-
-/* ================================
-   Forgot Password Page — Centered Card Design
-   ================================ */
-.forgot-password-body {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf2f8 100%);
-    padding: 1.5rem;
-}
-
-.forgot-card {
-    background-color: var(--card-bg);
     width: 100%;
-    max-width: 440px;
-    border-radius: var(--radius-md);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+}
+
+.status-enabled {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #d1fae5;
+}
+
+.status-disabled {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fee2e2;
+}
+
+.status-locked {
+    background-color: #fefce8;
+    color: #854d0e;
+    border: 1px solid #fde68a;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.action-buttons a {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
     border: 1px solid var(--border-color);
-    padding: 2.5rem;
+    background-color: var(--card-bg);
+    color: var(--primary-light);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    text-align: center;
 }
 
-.forgot-logo-area {
-    margin-bottom: 2rem;
-}
-
-.forgot-logo-area .logo {
-    font-size: 1.75rem;
-    font-weight: 800;
+.action-buttons a:hover {
+    background-color: var(--bg-color);
     color: var(--accent-color);
+    border-color: var(--accent-color);
 }
 
-.forgot-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
+.action-buttons a.action-delete {
+    color: var(--danger-color);
+    border-color: #fee2e2;
+    background-color: #fef2f2;
 }
 
-.forgot-desc {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    line-height: 1.5;
+.action-buttons a.action-delete:hover {
+    background-color: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+}
+
+/* Custom Table Styles for Lists (Generic) */
+.table-custom {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg);
+    table-layout: fixed;
+}
+
+.table-custom th,
+.table-custom td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    text-align: left;
+    vertical-align: middle;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.table-custom th:last-child,
+.table-custom td:last-child {
+    border-right: none;
+}
+
+.table-custom th {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.table-custom tr:nth-child(even) td {
+    background-color: #fafbfc;
+}
+
+.table-custom tr:nth-child(odd) td {
+    background-color: var(--card-bg);
+}
+
+.table-custom tr:hover td {
+    background-color: #f1f5f9;
+}
+
+/* Detail Info Layout */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
-.forgot-submit-btn {
-    width: 100%;
-    padding: 0.85rem;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-top: 0.5rem;
-    border-radius: var(--radius-sm);
+.detail-item {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
 }
 
-.forgot-back-link {
-    display: block;
-    text-align: center;
-    margin-top: 1rem;
+.detail-item-full {
+    grid-column: span 2;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+}
+
+.detail-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.detail-value {
+    font-size: 1rem;
+    color: var(--text-color);
+    font-weight: 550;
+}
+
+/* Job Posting Custom Styles */
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.subtitle {
+    color: var(--text-muted);
     font-size: 0.9rem;
+    margin: 0;
+}
+
+.search-form-container {
+    margin-bottom: 2rem;
+}
+
+.search-input-group {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 600px;
+}
+
+.salary-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background-color: #f1f5f9;
     color: var(--accent-color);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.job-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #d1fae5;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Form Layout Custom Styles */
+.form-card-container {
+    max-width: 700px;
+    margin: 2rem auto;
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Skills Checkbox Grid and pill badges */
+.skills-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.skill-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.skill-checkbox-item input {
+    cursor: pointer;
+}
+
+.skill-tag-badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-right: 0.35rem;
+    margin-bottom: 0.35rem;
+}
+
+/* =============================================================
+   APP SHELL — Sidebar + Main Area
+   ============================================================= */
+
+/* Extra design tokens for the shell */
+:root {
+    --sidebar-width: 240px;
+    --sidebar-bg: #0f172a;
+    --sidebar-text: #94a3b8;
+    --sidebar-text-hover: #f1f5f9;
+    --sidebar-active-bg: rgba(15, 118, 110, 0.15);
+    --sidebar-active-text: #0f766e;
+    --sidebar-active-border: #0f766e;
+    --sidebar-group-label: #475569;
+    --sidebar-brand-height: 64px;
+    --header-height: 60px;
+    --header-bg: #ffffff;
+    --header-border: #e2e8f0;
+}
+
+/* Shell wrapper: sidebar left + content right */
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* =============================================================
+   SIDEBAR
+   ============================================================= */
+#app-sidebar {
+    width: var(--sidebar-width);
+    min-height: 100vh;
+    background-color: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #334155 transparent;
+    flex-shrink: 0;
+}
+
+#app-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+#app-sidebar::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+}
+
+/* Brand */
+.sidebar-brand {
+    height: var(--sidebar-brand-height);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 1.25rem;
+    border-bottom: 1px solid #1e293b;
+    flex-shrink: 0;
+}
+
+.sidebar-brand-icon {
+    color: var(--accent-color);
+    font-size: 1.1rem;
+}
+
+.sidebar-brand-text {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    letter-spacing: 0.01em;
+}
+
+/* Nav group */
+.sidebar-group {
+    padding: 1rem 0 0.5rem;
+}
+
+.sidebar-group-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--sidebar-group-label);
+    padding: 0 1.25rem 0.5rem;
+}
+
+/* Individual link */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--sidebar-text-hover);
+    border-left-color: #334155;
+}
+
+.sidebar-link.active {
+    background-color: var(--sidebar-active-bg);
+    color: var(--sidebar-active-text);
+    border-left-color: var(--sidebar-active-border);
+    font-weight: 600;
+}
+
+.sidebar-icon {
+    font-size: 0.85rem;
+    width: 1.1rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* =============================================================
+   HEADER (top bar)
+   ============================================================= */
+#app-header {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    height: var(--header-height);
+    background-color: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.75rem;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-page-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+    letter-spacing: 0.01em;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* =============================================================
+   USER AVATAR + DROPDOWN
+   ============================================================= */
+.user-dropdown-wrapper {
+    position: relative;
+}
+
+.user-avatar-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: 1.5px solid var(--border-color);
+    border-radius: 999px;
+    padding: 0.3rem 0.65rem 0.3rem 0.3rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-avatar-btn:hover {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+.user-avatar-initials {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color), #115e59);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0;
+}
+
+.user-avatar-caret {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+}
+
+/* Dropdown panel */
+.user-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 210px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 300;
+    overflow: hidden;
+    animation: dropdownFadeIn 0.15s ease;
+}
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.user-dropdown-info {
+    padding: 0.85rem 1rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.user-dropdown-name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-dropdown-role {
+    font-size: 0.72rem;
+    color: var(--text-muted);
     font-weight: 500;
 }
 
-.forgot-back-link:hover {
-    color: var(--accent-hover);
-    text-decoration: underline;
+.user-dropdown-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 0;
 }
 
-/* Custom OTP and Utility Classes (replaces inline styles) */
-.otp-input {
+.user-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.user-dropdown-item:hover {
+    background-color: var(--bg-color);
+    color: var(--accent-color);
+}
+
+.user-dropdown-item--danger {
+    color: var(--danger-color);
+}
+
+.user-dropdown-item--danger:hover {
+    background-color: #fef2f2;
+    color: var(--danger-color);
+}
+
+.dropdown-item-icon {
+    font-size: 0.9rem;
+    width: 1rem;
     text-align: center;
-    letter-spacing: 0.5rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-    padding: 0.5rem;
+    flex-shrink: 0;
 }
 
-.alert-info-custom {
-    background-color: #f0fdfa;
-    border-color: #ccfbf1;
-    color: #0f766e;
+/* =============================================================
+   MAIN CONTENT AREA (right of sidebar, below header)
+   ============================================================= */
+.app-main {
+    margin-left: var(--sidebar-width);
+    padding-top: var(--header-height);
+    flex: 1;
+    min-height: 100vh;
+    background-color: var(--bg-color);
 }
 
-.form-group-no-margin {
-    margin-bottom: 0;
+.app-main-inner {
+    padding: 2rem 2.25rem;
+    max-width: 1300px;
 }
