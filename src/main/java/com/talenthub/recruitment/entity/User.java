@@ -23,6 +23,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -91,6 +92,12 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "otp", length = 10)
+    private String otp;
+
+    @Column(name = "exp_time")
+    private LocalDateTime expTime;
+
     @PrePersist
     void onCreate() {
         Instant now = Instant.now();
@@ -109,6 +116,21 @@ public class User {
         updatedAt = Instant.now();
     }
 
+    public String getOtp() {
+        return otp;
+    }
+
+    public LocalDateTime getExpTime() {
+        return expTime;
+    }
+
+    public void setOtp(String otp) {
+        this.otp = otp;
+    }
+
+    public void setExpTime(LocalDateTime expTime) {
+        this.expTime = expTime;
+    }
 
     public Long getId() {
         return id;

@@ -65,7 +65,6 @@ public class AuthController {
                 session.setAttribute("currentUser", loggedInUser);
                 session.setAttribute("currentRole", loggedInUser.getRole().getName());
                 session.setMaxInactiveInterval(30 * 60);
-
                 com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
                 log.setActorUser(loggedInUser);
                 log.setActorUsernameSnapshot(loggedInUser.getUsername());
@@ -74,7 +73,6 @@ public class AuthController {
                 log.setDescription("Đăng nhập thành công");
                 log.setIpAddress(ipAddress);
                 auditLogRepository.save(log);
-
                 return redirectToDashboard(loggedInUser);
             case ACCOUNT_LOCKED:
                 com.talenthub.recruitment.entity.AuditLog lockLog = new com.talenthub.recruitment.entity.AuditLog();

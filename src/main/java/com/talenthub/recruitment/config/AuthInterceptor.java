@@ -12,8 +12,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Object handler) throws Exception {
+            HttpServletResponse response,
+            Object handler) throws Exception {
         String path = request.getRequestURI();
         // Các đường dẫn công khai — không cần đăng nhập
         if (isPublicPath(path)) {
@@ -40,17 +40,22 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
         return true; // có quyền → cho đi tiếp
     }
+
     private boolean isPublicPath(String path) {
         return path.startsWith("/login")
                 || path.startsWith("/logout")
                 || path.startsWith("/register")
                 || path.startsWith("/forgot-password")
+                || path.startsWith("/verify-otp")
+                || path.startsWith("/resend-otp")
                 || path.startsWith("/reset-password")
-                || path.startsWith("/jobs")       // Public Job List SCR-13
+                || path.startsWith("/error")
+                || path.startsWith("/jobs") // Public Job List SCR-13
                 || path.startsWith("/css")
                 || path.startsWith("/js")
                 || path.startsWith("/images");
     }
+
     private boolean hasPermission(UserRole role, String path) {
         switch (role) {
             case ADMIN:
