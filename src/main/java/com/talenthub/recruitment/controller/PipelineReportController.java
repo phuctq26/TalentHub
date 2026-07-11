@@ -21,6 +21,11 @@ public class PipelineReportController {
         this.pipelineReportService = pipelineReportService;
     }
 
+    @GetMapping("/hr/reports")
+    public String viewPipelineReportEntry() {
+        return "redirect:/hr/dashboard";
+    }
+
     @GetMapping("/hr/jobs/{jobId}/pipeline-report")
     public String viewPipelineReport(
             @PathVariable Long jobId,
