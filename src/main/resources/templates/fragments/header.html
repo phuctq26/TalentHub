@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--/* ============================================================
+     HEADER FRAGMENT
+     Usage: <header th:replace="~{fragments/header :: header(pageTitle='...')}"></header>
+     Requires: session attribute "currentUser" (User entity)
+     ============================================================ */-->
+
+<header id="app-header" th:fragment="header(pageTitle)">
+
+    <!-- Left: Page Title -->
+    <div class="header-title">
+        <h1 class="header-page-title" th:text="${pageTitle} ?: 'TalentHub'">TalentHub</h1>
+    </div>
+
+    <!-- Right: User Avatar Dropdown -->
+    <div class="header-actions">
+        <div class="user-dropdown-wrapper" id="userDropdownWrapper">
+
+            <!-- Avatar trigger button -->
+            <button class="user-avatar-btn" id="userAvatarBtn" onclick="toggleUserDropdown()" aria-haspopup="true" aria-expanded="false">
+                <span class="user-avatar-initials" id="userInitials"
+                      th:text="${session.currentUser != null ? #strings.substring(session.currentUser.fullName, 0, 1).toUpperCase() : 'U'}">
+                    U
+                </span>
+                <span class="user-avatar-caret">&#9660;</span>
+            </button>
+
+            <!-- Dropdown menu -->
+            <div class="user-dropdown-menu" id="userDropdownMenu" role="menu" style="display: none;">
+
+                <!-- User info header -->
+                <div class="user-dropdown-info">
+                    <span class="user-dropdown-name"
+                          th:text="${session.currentUser != null ? session.currentUser.fullName : 'Người dùng'}">
+                        Người dùng
+                    </span>
+                    <span class="user-dropdown-role"
+                          th:text="${session.currentRole}">
+                        ROLE
+                    </span>
+                </div>
+
+                <div class="user-dropdown-divider"></div>
+
+                <!-- Profile -->
+                <a th:href="@{/user/profile}" class="user-dropdown-item" role="menuitem">
+                    <span class="dropdown-item-icon">&#128100;</span>
+                    Hồ sơ cá nhân
+                </a>
+
+                <!-- Change Password -->
+                <a th:href="@{/change-password}" class="user-dropdown-item" role="menuitem">
+                    <span class="dropdown-item-icon">&#128274;</span>
+                    Đổi mật khẩu
+                </a>
+
+                <div class="user-dropdown-divider"></div>
+
+                <!-- Logout -->
+                <a th:href="@{/logout}" class="user-dropdown-item user-dropdown-item--danger" role="menuitem">
+                    <span class="dropdown-item-icon">&#128682;</span>
+                    Đăng xuất
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleUserDropdown() {
+            const menu = document.getElementById('userDropdownMenu');
+            const btn  = document.getElementById('userAvatarBtn');
+            const isOpen = menu.style.display === 'block';
+            menu.style.display = isOpen ? 'none' : 'block';
+            btn.setAttribute('aria-expanded', String(!isOpen));
+        }
+
+        // Close when clicking outside
+        document.addEventListener('click', function (e) {
+            const wrapper = document.getElementById('userDropdownWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                const menu = document.getElementById('userDropdownMenu');
+                const btn  = document.getElementById('userAvatarBtn');
+                if (menu) menu.style.display = 'none';
+                if (btn)  btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+    </script>
+
+</header>
+
+</body>
+</html>

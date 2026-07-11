@@ -4,6 +4,7 @@ import com.talenthub.recruitment.dto.JobPostingForm;
 import com.talenthub.recruitment.entity.JobPosting;
 import com.talenthub.recruitment.entity.User;
 import com.talenthub.recruitment.entity.enums.JobStatus;
+import com.talenthub.recruitment.repository.ApplicationRepository;
 import com.talenthub.recruitment.repository.JobPostingRepository;
 import com.talenthub.recruitment.service.JobPostingService;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,11 @@ import java.util.List;
 public class JobPostingServiceImpl implements JobPostingService {
 
     private final JobPostingRepository jobPostingRepository;
+    private final ApplicationRepository applicationRepository;
 
-    public JobPostingServiceImpl(JobPostingRepository jobPostingRepository) {
+    public JobPostingServiceImpl(JobPostingRepository jobPostingRepository, ApplicationRepository applicationRepository) {
         this.jobPostingRepository = jobPostingRepository;
+        this.applicationRepository = applicationRepository;
     }
 
     @Override
@@ -86,28 +89,6 @@ public class JobPostingServiceImpl implements JobPostingService {
 
 
     @Override
-    public JobPosting saveDraft(JobPostingForm form) {
-        JobPosting job;
-
-        if (form.getId() == null) {
-            job = new JobPosting();
-            job.setStatus(JobStatus.DRAFT);
-        } else {
-            job = findById(form.getId());
-        }
-
-        job.setTitle(form.getTitle());
-        job.setDepartment(form.getDepartment());
-        job.setLocation(form.getLocation());
-        job.setDescription(form.getDescription());
-        job.setRequirements(form.getRequirements());
-        job.setSalaryRange(form.getSalaryRange());
-        job.setApplicationDeadline(form.getApplicationDeadline());
-
-        return jobPostingRepository.save(job);
-    }
-
-    @Override
     public JobPosting saveAndPublish(JobPostingForm form, User currentUser) {
         JobPosting job = saveDraft(form, currentUser);
 
@@ -115,18 +96,6 @@ public class JobPostingServiceImpl implements JobPostingService {
 
             job.setStatus(JobStatus.ACTIVE);
 
-            job.setPublishedAt(Instant.now());
-        }
-
-        return jobPostingRepository.save(job);
-    }
-
-    @Override
-    public JobPosting saveAndPublish(JobPostingForm form) {
-        JobPosting job = saveDraft(form);
-
-        if (job.getStatus() == JobStatus.DRAFT) {
-            job.setStatus(JobStatus.ACTIVE);
             job.setPublishedAt(Instant.now());
         }
 
@@ -172,6 +141,10 @@ public class JobPostingServiceImpl implements JobPostingService {
         if (job.getStatus() != JobStatus.DRAFT) {
 
             throw new RuntimeException("Chỉ được xóa tin ở trạng thái nháp.");
+        }
+
+        if (applicationRepository.countByJobId(id) > 0) {
+            throw new RuntimeException("Không thể xóa tin tuyển dụng đã có hồ sơ ứng tuyển.");
         }
 
         jobPostingRepository.delete(job);

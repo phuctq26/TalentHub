@@ -86,4 +86,13 @@ public interface JobPostingRepository extends JpaRepository<JobPosting, Long> {
       @Param("keyword") String keyword,
       @Param("statusText") String statusText,
       @Param("department") String department);
+
+  @Query(value = "SELECT COUNT(*) FROM job_postings WHERE CAST(status AS TEXT) = 'ACTIVE'", nativeQuery = true)
+  long countActiveJobs();
+
+  @Query(value = "SELECT COUNT(*) FROM job_postings WHERE CAST(status AS TEXT) = 'ACTIVE' AND (:hrManagerId IS NULL OR created_by_id = :hrManagerId)", nativeQuery = true)
+  long countActiveJobsForHrOrAdmin(@Param("hrManagerId") Long hrManagerId);
+
+  @Query(value = "SELECT * FROM job_postings WHERE CAST(status AS TEXT) = 'ACTIVE' AND (:hrManagerId IS NULL OR created_by_id = :hrManagerId) ORDER BY published_at DESC, created_at DESC", nativeQuery = true)
+  List<JobPosting> findActiveJobsForHrOrAdmin(@Param("hrManagerId") Long hrManagerId);
 }
