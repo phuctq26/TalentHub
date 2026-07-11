@@ -1,4 +1,6 @@
-/* Premium Design Theme Variables */
+/* ================================
+   CSS Variables — Design Tokens
+   ================================ */
 :root {
     --primary-color: #1e293b;
     --primary-light: #334155;
@@ -18,10 +20,11 @@
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
-    --bs-badge-font-size: 1.00em;
 }
 
-/* Reset and Global Styles */
+/* ================================
+   Global Reset & Base
+   ================================ */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -45,13 +48,10 @@ body {
     padding: 0 1.5rem;
 }
 
-/* Typography */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+/* ================================
+   Typography
+   ================================ */
+h1, h2, h3, h4, h5, h6 {
     color: var(--primary-color);
     font-weight: 700;
     line-height: 1.25;
@@ -68,56 +68,42 @@ a:hover {
     color: var(--accent-hover);
 }
 
-/* Header and Navigation */
-.header {
-    background-color: var(--card-bg);
-    border-bottom: 1px solid var(--border-color);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: var(--shadow-sm);
-}
-
-.header-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 70px;
+.text-center {
+    text-align: center;
 }
 
 .logo {
     font-size: 1.5rem;
     font-weight: 800;
     color: var(--accent-color);
-    display: flex;
-    align-items: center;
 }
 
-.nav {
-    display: flex;
-    gap: 1.5rem;
-}
-
-.nav a {
+.subtitle {
     color: var(--text-muted);
-    font-weight: 550;
-    font-size: 0.95rem;
-    padding: 0.5rem 0;
-    border-bottom: 2px solid transparent;
+    font-size: 0.9rem;
+    margin: 0;
 }
 
-.nav a:hover,
-.nav a.active {
-    color: var(--accent-color);
-    border-bottom-color: var(--accent-color);
+/* ================================
+   Layout
+   ================================ */
+.main-content {
+    flex: 1;
+    padding: 3rem 0;
 }
 
-.auth-buttons {
-    display: flex;
-    gap: 1rem;
+.card {
+    background-color: var(--card-bg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
 }
 
-/* Buttons */
+/* ================================
+   Buttons
+   ================================ */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -129,6 +115,8 @@ a:hover {
     border: 1px solid transparent;
     cursor: pointer;
     transition: all 0.2s ease;
+    font-family: var(--font-family);
+    text-decoration: none;
 }
 
 .btn-primary {
@@ -151,66 +139,9 @@ a:hover {
     background-color: var(--bg-color);
 }
 
-.btn-login {
-    color: var(--primary-color);
-}
-
-.btn-login:hover {
-    color: var(--accent-color);
-}
-
-.btn-register {
-    background-color: var(--accent-color);
-    color: white;
-}
-
-.btn-register:hover {
-    background-color: var(--accent-hover);
-    color: white;
-}
-
-/* Main Content Layout */
-.main-content {
-    flex: 1;
-    padding: 3rem 0;
-}
-
-/* Footer */
-.footer {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 2rem 0;
-    margin-top: auto;
-    border-top: 1px solid var(--primary-light);
-}
-
-.footer p {
-    color: #94a3b8;
-    font-size: 0.9rem;
-}
-
-.text-center {
-    text-align: center;
-}
-
-/* Cards & Layouts for lists */
-.card {
-    background-color: var(--card-bg);
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    padding: 2rem;
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 2rem;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-}
-
-/* Forms styling */
+/* ================================
+   Forms
+   ================================ */
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -231,6 +162,7 @@ a:hover {
     background-color: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
+    font-family: var(--font-family);
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -240,18 +172,15 @@ a:hover {
     box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
 }
 
-.form-error {
-    color: var(--danger-color);
-    font-size: 0.8rem;
-    margin-top: 0.25rem;
-}
-
-/* Alert Boxes */
+/* ================================
+   Alerts
+   ================================ */
 .alert {
     padding: 1rem;
     border-radius: var(--radius-sm);
     margin-bottom: 1.5rem;
     border: 1px solid transparent;
+    font-size: 0.9rem;
 }
 
 .alert-danger {
@@ -266,329 +195,129 @@ a:hover {
     color: #065f46;
 }
 
-/* User Management Table Styles */
-.table-users {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--card-bg);
-    table-layout: fixed;
+.alert-warning {
+    background-color: #fffbeb;
+    border-color: #fde68a;
+    color: #92400e;
 }
 
-.table-users th,
-.table-users td {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
-    text-align: left;
-    vertical-align: middle;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-.table-users th:last-child,
-.table-users td:last-child {
-    border-right: none;
-}
-
-.table-users th {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-weight: 600;
-    border-bottom: 2px solid var(--border-color);
-}
-
-.table-users tr:nth-child(even) td {
-    background-color: #fafbfc;
-}
-
-.table-users tr:nth-child(odd) td {
-    background-color: var(--card-bg);
-}
-
-.table-users tr:hover td {
-    background-color: #f1f5f9;
-}
-
-/* Column Width Definitions */
-.col-id {
-    width: 70px;
-}
-
-.col-username {
-    width: 140px;
-}
-
-.col-name {
-    width: 180px;
-}
-
-.col-email {
-    width: 230px;
-}
-
-.col-role {
-    width: 120px;
-}
-
-.col-status {
-    width: 120px;
-}
-
-.col-actions {
-    width: 240px;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 0.35rem 0.75rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-align: center;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.status-enabled {
-    background-color: #ecfdf5;
-    color: #065f46;
-    border: 1px solid #d1fae5;
-}
-
-.status-disabled {
-    background-color: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fee2e2;
-}
-
-.action-buttons {
+/* ================================
+   Login Page
+   ================================ */
+.login-page {
+    min-height: 100vh;
     display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.action-buttons a {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.8rem;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    border: 1px solid var(--border-color);
-    background-color: var(--card-bg);
-    color: var(--primary-light);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    text-align: center;
-}
-
-.action-buttons a:hover {
+    align-items: stretch;
     background-color: var(--bg-color);
-    color: var(--accent-color);
-    border-color: var(--accent-color);
 }
 
-.action-buttons a.action-delete {
-    color: var(--danger-color);
-    border-color: #fee2e2;
-    background-color: #fef2f2;
-}
-
-.action-buttons a.action-delete:hover {
-    background-color: var(--danger-color);
+/* Left: branding panel */
+.login-brand-panel {
+    display: none;
+    flex: 1;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    padding: 3rem;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
     color: white;
-    border-color: var(--danger-color);
 }
 
-/* Custom Table Styles for Lists (Generic) */
-.table-custom {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--card-bg);
-    table-layout: fixed;
+@media (min-width: 900px) {
+    .login-brand-panel {
+        display: flex;
+    }
 }
 
-.table-custom th,
-.table-custom td {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
-    text-align: left;
-    vertical-align: middle;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+.login-brand-logo {
+    font-size: 2rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 2.5rem;
+    letter-spacing: -0.5px;
+    text-decoration: none;
 }
 
-.table-custom th:last-child,
-.table-custom td:last-child {
-    border-right: none;
+.login-brand-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 1rem;
 }
 
-.table-custom th {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    font-weight: 600;
-    border-bottom: 2px solid var(--border-color);
-}
-
-.table-custom tr:nth-child(even) td {
-    background-color: #fafbfc;
-}
-
-.table-custom tr:nth-child(odd) td {
-    background-color: var(--card-bg);
-}
-
-.table-custom tr:hover td {
-    background-color: #f1f5f9;
-}
-
-/* Detail Info Layout */
-.detail-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.detail-item {
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.75rem;
-}
-
-.detail-item-full {
-    grid-column: span 2;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.75rem;
-}
-
-.detail-label {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.detail-value {
+.login-brand-desc {
     font-size: 1rem;
-    color: var(--text-color);
-    font-weight: 550;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.7;
+    max-width: 380px;
 }
 
-/* Job Posting Custom Styles */
-.list-header {
+.login-brand-features {
+    list-style: none;
+    margin-top: 2.5rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1rem;
+    flex-direction: column;
+    gap: 0.85rem;
 }
 
-.subtitle {
+.login-brand-features li {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.login-brand-features li::before {
+    content: "✓";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Right: form panel (shared by login & forgot-password) */
+.login-form-panel {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem 2.5rem;
+    background-color: var(--card-bg);
+}
+
+@media (min-width: 900px) {
+    .login-form-panel {
+        padding: 4rem 3.5rem;
+    }
+}
+
+.login-form-header {
+    margin-bottom: 2rem;
+}
+
+.login-form-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.4rem;
+}
+
+.login-form-subtitle {
+    font-size: 0.95rem;
     color: var(--text-muted);
-    font-size: 0.9rem;
-    margin: 0;
+    line-height: 1.5;
 }
 
-.search-form-container {
-    margin-bottom: 2rem;
-}
-
-.search-input-group {
-    display: flex;
-    gap: 0.5rem;
-    max-width: 600px;
-}
-
-.salary-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    background-color: #f1f5f9;
-    color: var(--accent-color);
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    font-size: 0.85rem;
-}
-
-.job-type-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    background-color: #ecfdf5;
-    color: #065f46;
-    border: 1px solid #d1fae5;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    font-size: 0.85rem;
-}
-
-/* Form Layout Custom Styles */
-.form-card-container {
-    max-width: 700px;
-    margin: 2rem auto;
-}
-
-.form-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    border-top: 1px solid var(--border-color);
-    padding-top: 1.5rem;
-    margin-top: 2rem;
-}
-
-/* Skills Checkbox Grid and pill badges */
-.skills-checkbox-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 0.75rem;
-    margin-top: 0.5rem;
-}
-
-.skill-checkbox-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.skill-checkbox-item input {
-    cursor: pointer;
-}
-
-.skill-tag-badge {
-    display: inline-block;
-    padding: 0.25rem 0.6rem;
-    background-color: #e0f2fe;
-    color: #0369a1;
-    border: 1px solid #bae6fd;
-    border-radius: 9999px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-right: 0.35rem;
-    margin-bottom: 0.35rem;
-}
-
-/* Login Page */
-.login-wrapper {
-    max-width: 440px;
-    margin: 0 auto;
-}
-
-.login-logo {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-
-.login-logo .subtitle {
-    margin-top: 0.5rem;
-}
-
+/* Password toggle */
 .password-input-group {
     position: relative;
     display: flex;
@@ -601,7 +330,7 @@ a:hover {
 
 .toggle-password-btn {
     position: absolute;
-    right: 0.75rem;
+    right: 0.85rem;
     background: none;
     border: none;
     cursor: pointer;
@@ -616,21 +345,60 @@ a:hover {
     color: var(--accent-color);
 }
 
-.login-divider {
-    border-top: 1px solid var(--border-color);
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-}
-
-.login-divider p {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    margin-top: 0.5rem;
-}
-
+/* Submit button full-width */
 .login-submit {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.85rem;
     font-size: 1rem;
+    letter-spacing: 0.3px;
+}
+
+/* Footer links below form */
+.login-footer-links {
+    text-align: center;
     margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.login-footer-links p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.login-footer-links p:last-child {
+    margin-bottom: 0;
+}
+
+/* ================================
+   Forgot Password page extras
+   ================================ */
+.forgot-hint {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.forgot-hint strong {
+    color: var(--text-color);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    transition: color 0.2s ease;
+}
+
+.back-link:hover {
+    color: var(--accent-color);
 }

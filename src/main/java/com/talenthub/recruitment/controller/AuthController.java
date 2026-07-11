@@ -66,6 +66,13 @@ public class AuthController {
         return "redirect:/login";
     }
 
+    @GetMapping("/forgot-password")
+    public String showForgotPassword() {
+        return "auth/forgot-password";
+    }
+
+    // TODO: POST /forgot-password — gửi email đặt lại mật khẩu
+
     private String redirectToDashboard(User user) {
         String roleName = user.getRole().getName().toUpperCase();
         switch (roleName) {
