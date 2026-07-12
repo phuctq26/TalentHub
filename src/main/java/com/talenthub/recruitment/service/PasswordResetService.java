@@ -37,7 +37,8 @@ public class PasswordResetService {
 
     public enum SendOtpResult {
         SUCCESS,
-        EMAIL_NOT_FOUND
+        EMAIL_NOT_FOUND,
+        ACCOUNT_INACTIVE  // tài khoản bị vô hiệu hoá, không cho reset
     }
 
     public enum VerifyOtpResult {
@@ -59,6 +60,11 @@ public class PasswordResetService {
         }
 
         User user = optUser.get();
+
+        // Không cho phép tài khoản bị vô hiệu hoá thực hiện reset mật khẩu
+        if (user.getStatus() != com.talenthub.recruitment.entity.enums.AccountStatus.ACTIVE) {
+            return SendOtpResult.ACCOUNT_INACTIVE;
+        }
 
         // Tạo mã OTP 6 chữ số (có thể có số 0 ở đầu)
         String otp = String.format("%06d", RANDOM.nextInt(1_000_000));

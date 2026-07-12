@@ -1,4 +1,5 @@
 package com.talenthub.recruitment.service;
+
 import com.talenthub.recruitment.entity.User;
 import com.talenthub.recruitment.entity.enums.AccountStatus;
 import com.talenthub.recruitment.repository.UserRepository;
@@ -31,21 +32,21 @@ public class AuthService {
      */
     public enum LoginResult {
         SUCCESS,
-        INVALID_CREDENTIALS,  // sai username/password
-        ACCOUNT_LOCKED,       // tài khoản đang bị khóa
-        ACCOUNT_INACTIVE      // tài khoản bị vô hiệu hóa bởi Admin
+        INVALID_CREDENTIALS, // sai username/password
+        ACCOUNT_LOCKED, // tài khoản đang bị khóa
+        ACCOUNT_INACTIVE // tài khoản bị vô hiệu hóa bởi Admin
     }
 
     /**
      * Xử lý đăng nhập:
-     *  1. Tìm user theo username hoặc email
-     *  2. Kiểm tra khóa tài khoản
-     *  3. Verify password
-     *  4. Reset/tăng failed attempts
+     * 1. Tìm user theo username hoặc email
+     * 2. Kiểm tra khóa tài khoản
+     * 3. Verify password
+     * 4. Reset/tăng failed attempts
      */
     @Transactional
     public LoginResult login(String usernameOrEmail, String rawPassword,
-                             UserHolder userHolder) {
+            UserHolder userHolder) {
         // Tìm user bằng cả username lẫn email
         Optional<User> optUser = userRepository
                 .findByUsernameOrEmail(usernameOrEmail, usernameOrEmail);
@@ -102,8 +103,14 @@ public class AuthService {
      */
     public static class UserHolder {
         private User user;
-        public User getUser() { return user; }
-        public void setUser(User user) { this.user = user; }
+
+        public User getUser() {
+            return user;
+        }
+
+        public void setUser(User user) {
+            this.user = user;
+        }
     }
 
     /**
