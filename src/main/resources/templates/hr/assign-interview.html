@@ -2,12 +2,13 @@
       th:replace="~{layout/app-layout :: layout(~{::main-content}, ${title}, ${activeTab})}">
 <body>
 <main th:fragment="main-content">
+
     <!-- Link the page-specific stylesheet -->
     <link rel="stylesheet" th:href="@{/css/hr/assign-interview.css}">
 
     <!-- Back Button -->
     <div class="mb-4">
-        <a th:href="@{/hr/applications/{id}(id=${application.id})}" class="btn btn-outline-secondary btn-sm">
+        <a th:href="@{/hr/applications/{id}(id=${app.id})}" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-arrow-left me-1"></i> Quay lại chi tiết hồ sơ
         </a>
     </div>
@@ -25,14 +26,14 @@
             <!-- Context Header: Candidate and Job Info -->
             <div class="context-header">
                 <div class="context-title">Hồ sơ phỏng vấn</div>
-                <h4 class="context-candidate" th:text="${application.candidate.fullName}">Candidate Name</h4>
+                <h4 class="context-candidate" th:text="${app.candidate.fullName}">Candidate Name</h4>
                 <div class="context-job">
-                    Vị trí ứng tuyển: <strong th:text="${application.job.title}">Job Title</strong>
+                    Vị trí ứng tuyển: <strong th:text="${app.job.title}">Job Title</strong>
                 </div>
             </div>
 
             <!-- Form -->
-            <form th:action="@{/hr/applications/{id}/assign-interview(id=${application.id})}" method="post">
+            <form th:action="@{/hr/applications/{id}/assign-interview(id=${app.id})}" method="post">
                 
                 <h5 class="form-section-title">Lên lịch & Phân công phỏng vấn</h5>
 
@@ -62,7 +63,7 @@
                     <div class="col-md-6 mb-4">
                         <label for="interviewDate" class="form-label">Ngày phỏng vấn</label>
                         <input type="date" id="interviewDate" name="interviewDate" class="form-control" 
-                               th:value="${param.interviewDate}" required>
+                                th:value="${param.interviewDate}" required>
                         <div th:if="${dateError}" class="input-feedback-error" th:text="${dateError}"></div>
                     </div>
 
@@ -87,7 +88,7 @@
 
                 <!-- Form Action Buttons -->
                 <div class="form-buttons-group">
-                    <a th:href="@{/hr/applications/{id}(id=${application.id})}" class="btn-schedule-secondary">
+                    <a th:href="@{/hr/applications/{id}(id=${app.id})}" class="btn-schedule-secondary">
                         Hủy bỏ
                     </a>
                     <button type="submit" class="btn-schedule-primary" th:disabled="${#lists.isEmpty(interviewers)}">
