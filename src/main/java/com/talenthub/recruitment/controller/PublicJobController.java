@@ -2,6 +2,7 @@ package com.talenthub.recruitment.controller;
 
 import com.talenthub.recruitment.entity.JobPosting;
 import com.talenthub.recruitment.service.PublicJobService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +25,7 @@ public class PublicJobController {
             @RequestParam(required = false) String department,
             @RequestParam(required = false) String location,
             @RequestParam(defaultValue = "0") int page,
+            HttpSession session,
             Model model
     ) {
         Page<JobPosting> jobPage = publicJobService.getPublicJobs(keyword, department, location, page, 5);
@@ -33,12 +35,24 @@ public class PublicJobController {
         model.addAttribute("department", department);
         model.addAttribute("location", location);
 
-        return "candidate/public-job-list";
+        return isLoggedIn(session)
+                ? "candidate/public-job-list-app"
+                : "candidate/public-job-list";
     }
 
     @GetMapping("/jobs/{id}")
-    public String publicJobDetail(@PathVariable Long id, Model model) {
+    public String publicJobDetail(
+            @PathVariable Long id,
+            HttpSession session,
+            Model model
+    ) {
         model.addAttribute("job", publicJobService.getPublicJobDetail(id));
-        return "candidate/public-job-detail";
+        return isLoggedIn(session)
+                ? "candidate/public-job-detail-app"
+                : "candidate/public-job-detail";
+    }
+
+    private boolean isLoggedIn(HttpSession session) {
+        return session.getAttribute("currentUser") != null;
     }
 }
