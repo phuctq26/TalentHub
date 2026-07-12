@@ -1,0 +1,159 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, ${title}, ${activeTab})}">
+<body>
+<main th:fragment="main-content">
+    <link rel="stylesheet" th:href="@{/css/interviewer/evaluate.css}">
+
+    <!-- Back Button / Page Title -->
+    <div class="d-flex align-items-center mb-4">
+        <a th:href="@{/interviewer/applications/{id}(id=${app.id})}" class="btn btn-outline-secondary btn-sm me-3">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+        <h2 class="h4 fw-bold mb-0 text-dark">Đánh giá kết quả phỏng vấn</h2>
+    </div>
+
+    <!-- Context Header -->
+    <div class="card border-0 shadow-sm mb-4 bg-light">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-3 text-secondary-emphasis"><i class="bi bi-person-workspace text-primary me-2"></i>Thông tin cuộc phỏng vấn</h5>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <span class="text-muted small d-block">Ứng viên</span>
+                    <strong class="text-dark fs-5" th:text="${app.candidate.fullName}">Nguyễn Văn A</strong>
+                </div>
+                <div class="col-md-4">
+                    <span class="text-muted small d-block">Vị trí ứng tuyển</span>
+                    <strong class="text-dark fs-5" th:text="${app.job.title}">Java Backend Developer</strong>
+                </div>
+                <div class="col-md-4">
+                    <span class="text-muted small d-block">Lịch phỏng vấn</span>
+                    <strong class="text-dark fs-5" th:text="${#temporals.format(interview.scheduledAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh')}">12/07/2026 14:00</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluation Form -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form th:action="@{/interviewer/interviews/{interviewId}/evaluate(interviewId=${interview.id})}" method="post" id="evaluationForm">
+                
+                <!-- Rating Stars -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-dark mb-2">Đánh giá chung (1-5 Sao) <span class="text-danger">*</span></label>
+                    <div class="star-rating d-flex gap-2 align-items-center">
+                        <span class="star-item" data-value="1"><i class="bi bi-star text-muted"></i></span>
+                        <span class="star-item" data-value="2"><i class="bi bi-star text-muted"></i></span>
+                        <span class="star-item" data-value="3"><i class="bi bi-star text-muted"></i></span>
+                        <span class="star-item" data-value="4"><i class="bi bi-star text-muted"></i></span>
+                        <span class="star-item" data-value="5"><i class="bi bi-star text-muted"></i></span>
+                    </div>
+                    <input type="hidden" name="rating" id="ratingInput" th:value="${rating != null ? rating : ''}" required>
+                    <div class="text-danger small mt-1" th:if="${ratingError}" th:text="${ratingError}"></div>
+                </div>
+
+                <!-- Written Feedback -->
+                <div class="mb-4">
+                    <label for="feedback" class="form-label fw-bold text-dark">Nhận xét chi tiết (Written feedback) <span class="text-danger">*</span></label>
+                    <textarea name="feedback" id="feedback" class="form-control" rows="8" 
+                              placeholder="Nhập nhận xét chi tiết về kiến thức chuyên môn, kinh nghiệm thực tế, thái độ làm việc, kỹ năng mềm..." 
+                              th:text="${feedback != null ? feedback : ''}" required></textarea>
+                    <div class="text-danger small mt-1" th:if="${feedbackError}" th:text="${feedbackError}"></div>
+                </div>
+
+                <!-- Notice -->
+                <div class="alert alert-warning border-0 d-flex align-items-center mb-4">
+                    <i class="bi bi-exclamation-triangle-fill fs-5 me-3 text-warning"></i>
+                    <div>
+                        <strong>Lưu ý quan trọng:</strong> Một khi đã nộp đánh giá này, bạn sẽ không thể chỉnh sửa hoặc rút lại.
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4 py-2" id="submitBtn">
+                        <i class="bi bi-send me-1"></i> Nộp đánh giá
+                    </button>
+                    <a th:href="@{/interviewer/applications/{id}(id=${app.id})}" class="btn btn-outline-secondary px-4 py-2">
+                        Hủy bỏ
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Star Rating Interaction Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('.star-item');
+            const ratingInput = document.getElementById('ratingInput');
+            const form = document.getElementById('evaluationForm');
+
+            // Initialize stars if old value exists
+            const initialVal = parseInt(ratingInput.value);
+            if (initialVal >= 1 && initialVal <= 5) {
+                highlightStars(initialVal);
+            }
+
+            stars.forEach(star => {
+                // Click handler
+                star.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    ratingInput.value = value;
+                    highlightStars(value);
+                });
+
+                // Hover handler
+                star.addEventListener('mouseenter', function() {
+                    const value = this.getAttribute('data-value');
+                    previewStars(value);
+                });
+            });
+
+            const ratingContainer = document.querySelector('.star-rating');
+            ratingContainer.addEventListener('mouseleave', function() {
+                const currentVal = parseInt(ratingInput.value) || 0;
+                highlightStars(currentVal);
+            });
+
+            function highlightStars(count) {
+                stars.forEach((star, index) => {
+                    const icon = star.querySelector('i');
+                    if (index < count) {
+                        icon.className = 'bi bi-star-fill text-warning';
+                    } else {
+                        icon.className = 'bi bi-star text-muted';
+                    }
+                });
+            }
+
+            function previewStars(count) {
+                stars.forEach((star, index) => {
+                    const icon = star.querySelector('i');
+                    if (index < count) {
+                        icon.className = 'bi bi-star-fill text-warning opacity-75';
+                    } else {
+                        icon.className = 'bi bi-star text-muted';
+                    }
+                });
+            }
+
+            form.addEventListener('submit', function(e) {
+                const rating = parseInt(ratingInput.value);
+                if (!rating || rating < 1 || rating > 5) {
+                    e.preventDefault();
+                    alert('Vui lòng chọn mức điểm đánh giá từ 1 đến 5 sao.');
+                    return;
+                }
+                const confirmed = confirm('Bạn có chắc chắn muốn nộp kết quả đánh giá phỏng vấn này không? Hành động này không thể hoàn tác.');
+                if (!confirmed) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+
+</main>
+</body>
+</html>
