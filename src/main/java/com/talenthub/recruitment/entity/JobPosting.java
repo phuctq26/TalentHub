@@ -190,6 +190,14 @@ public class JobPosting {
         this.closedAt = closedAt;
     }
 
+    @jakarta.persistence.Transient
+    public String getFormattedCreatedAt() {
+        if (createdAt == null) return "-";
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                .withZone(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
+        return formatter.format(createdAt);
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }

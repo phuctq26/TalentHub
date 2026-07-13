@@ -27,7 +27,7 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "actor_user_id")
     private User actorUser;
 
@@ -115,6 +115,14 @@ public class AuditLog {
 
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
+    }
+
+    @jakarta.persistence.Transient
+    public String getFormattedCreatedAt() {
+        if (createdAt == null) return "-";
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                .withZone(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
+        return formatter.format(createdAt);
     }
 
     public Instant getCreatedAt() {

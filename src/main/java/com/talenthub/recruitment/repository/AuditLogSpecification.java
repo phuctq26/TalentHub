@@ -45,7 +45,7 @@ public class AuditLogSpecification {
             }
 
             if (dateTo != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(
+                predicates.add(criteriaBuilder.lessThan(
                         root.get("createdAt"),
                         dateTo.plusDays(1).atStartOfDay(ZoneId.of("Asia/Ho_Chi_Minh")).toInstant()
                 ));

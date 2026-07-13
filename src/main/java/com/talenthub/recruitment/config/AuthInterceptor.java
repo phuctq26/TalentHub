@@ -50,7 +50,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 || path.startsWith("/resend-otp")
                 || path.startsWith("/reset-password")
                 || path.startsWith("/error")
-                || path.startsWith("/jobs") // Public Job List SCR-13
+                || path.equals("/jobs") || path.matches("^/jobs/\\d+$") // Public Job List & Detail
                 || path.startsWith("/css")
                 || path.startsWith("/js")
                 || path.startsWith("/images");
@@ -65,7 +65,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             case INTERVIEWER:
                 return path.startsWith("/interviewer");
             case CANDIDATE:
-                return path.startsWith("/candidate") || path.startsWith("/jobs");
+                return path.startsWith("/candidate") || (path.startsWith("/jobs") && !path.startsWith("/jobs/manage"));
             default:
                 return false;
         }
