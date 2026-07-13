@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Service
+@org.springframework.transaction.annotation.Transactional
 public class JobPostingServiceImpl implements JobPostingService {
 
     private final JobPostingRepository jobPostingRepository;
@@ -42,8 +43,14 @@ public class JobPostingServiceImpl implements JobPostingService {
 
     @Override
     public JobPosting findById(Long id) {
-        return jobPostingRepository.findById(id).
+        JobPosting job = jobPostingRepository.findById(id).
                 orElseThrow(() -> new RuntimeException("Không tìm thấy tin tuyển dụng"));
+        
+        // Tránh lỗi LazyInitializationException trên màn hình Detail
+        if (job.getCreatedBy() != null) {
+            job.getCreatedBy().getFullName(); 
+        }
+        return job;
     }
 
     @Override

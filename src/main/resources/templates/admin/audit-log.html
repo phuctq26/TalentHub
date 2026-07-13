@@ -14,9 +14,49 @@
         </a>
     </div>
 
+    <!-- Filter Form (SCR-09) -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/audit-log}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="eventType" class="form-label fw-medium text-secondary small">Loại sự kiện</label>
+                    <select id="eventType" name="eventType" class="form-select">
+                        <option value="">Tất cả sự kiện</option>
+                        <option value="SIGN_IN_SUCCESS" th:selected="${selectedEventType == 'SIGN_IN_SUCCESS'}">Đăng nhập thành công</option>
+                        <option value="SIGN_IN_FAILURE" th:selected="${selectedEventType == 'SIGN_IN_FAILURE'}">Đăng nhập thất bại</option>
+                        <option value="ACCOUNT_CREATED" th:selected="${selectedEventType == 'ACCOUNT_CREATED'}">Tạo tài khoản</option>
+                        <option value="ACCOUNT_DEACTIVATED" th:selected="${selectedEventType == 'ACCOUNT_DEACTIVATED'}">Vô hiệu hóa tài khoản</option>
+                        <option value="ACCOUNT_UNLOCKED" th:selected="${selectedEventType == 'ACCOUNT_UNLOCKED'}">Mở khóa tài khoản</option>
+                        <option value="ACCOUNT_LOCKED" th:selected="${selectedEventType == 'ACCOUNT_LOCKED'}">Khóa tài khoản</option>
+                        <option value="APPLICATION_STATUS_CHANGED" th:selected="${selectedEventType == 'APPLICATION_STATUS_CHANGED'}">Đổi trạng thái ứng tuyển</option>
+                        <option value="CV_DOWNLOADED" th:selected="${selectedEventType == 'CV_DOWNLOADED'}">Tải CV</option>
+                        <option value="EVALUATION_SUBMITTED" th:selected="${selectedEventType == 'EVALUATION_SUBMITTED'}">Nộp đánh giá phỏng vấn</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="actor" class="form-label fw-medium text-secondary small">Người thực hiện</label>
+                    <input type="text" id="actor" name="actor" class="form-control" placeholder="Tên hoặc username" th:value="${selectedActor}">
+                </div>
+                <div class="col-md-2">
+                    <label for="dateFrom" class="form-label fw-medium text-secondary small">Từ ngày</label>
+                    <input type="date" id="dateFrom" name="dateFrom" class="form-control" th:value="${selectedDateFrom}">
+                </div>
+                <div class="col-md-2">
+                    <label for="dateTo" class="form-label fw-medium text-secondary small">Đến ngày</label>
+                    <input type="date" id="dateTo" name="dateTo" class="form-control" th:value="${selectedDateTo}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i> Lọc dữ liệu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Empty State -->
     <div th:if="${#lists.isEmpty(logs)}" class="alert alert-warning border-0 shadow-sm" role="alert">
-        Không có bản ghi nhật ký hoạt động nào trong hệ thống.
+        Không có bản ghi nhật ký hoạt động nào phù hợp với bộ lọc.
     </div>
 
     <!-- Logs Table -->
@@ -25,31 +65,32 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-dark">
                     <tr>
-                        <th class="ps-3" style="width: 80px;">ID</th>
-                        <th style="width: 150px;">Sự kiện</th>
+                        <th class="ps-3" style="width: 180px;">Thời gian</th>
                         <th style="width: 200px;">Người thực hiện</th>
+                        <th style="width: 150px;">Sự kiện</th>
                         <th>Chi tiết hoạt động</th>
-                        <th style="width: 150px;">Địa chỉ IP</th>
-                        <th class="pe-3" style="width: 180px;">Thời gian</th>
+                        <th class="pe-3" style="width: 150px;">Địa chỉ IP</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="log : ${logs}">
-                        <td class="ps-3 font-monospace text-muted" th:text="${log.id}">1</td>
-                        <td>
-                            <span class="badge bg-dark py-2 px-3 text-uppercase" th:text="${log.eventType}">LOGIN</span>
-                        </td>
+                        <td class="ps-3 small text-muted" th:text="${log.formattedCreatedAt}">Thời gian</td>
                         <td>
                             <div>
-                                <strong th:text="${log.actorUsernameSnapshot}">admin</strong>
+                                <strong>
+                                    <span th:text="${log.actorUsernameSnapshot}">admin</span>
+                                    <span th:if="${log.actorUser != null and log.actorUser.status != null and log.actorUser.status.name() == 'INACTIVE'}" class="text-danger small">(deactivated)</span>
+                                </strong>
                                 <div class="text-muted small" th:text="${log.actorFullNameSnapshot}">Quản trị viên</div>
                             </div>
                         </td>
                         <td>
+                            <span class="badge bg-dark py-2 px-3 text-uppercase" th:text="${log.eventType}">LOGIN</span>
+                        </td>
+                        <td>
                             <span class="text-dark fw-medium" th:text="${log.description}">Chi tiết hoạt động</span>
                         </td>
-                        <td class="font-monospace text-secondary small" th:text="${log.ipAddress != null ? log.ipAddress : '-'}">127.0.0.1</td>
-                        <td class="pe-3 small text-muted" th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss', 'Asia/Ho_Chi_Minh') : '-'}">Thời gian</td>
+                        <td class="pe-3 font-monospace text-secondary small" th:text="${log.ipAddress != null ? log.ipAddress : '-'}">127.0.0.1</td>
                     </tr>
                 </tbody>
             </table>
@@ -66,19 +107,19 @@
             <ul class="pagination pagination-sm mb-0">
                 <!-- Previous Button -->
                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                    <a class="page-link" th:href="@{/admin/audit-log(page=${currentPage - 1})}">
+                    <a class="page-link" th:href="${currentPage == 0 ? '#' : @{/admin/audit-log(page=${currentPage - 1}, eventType=${selectedEventType}, actor=${selectedActor}, dateFrom=${selectedDateFrom}, dateTo=${selectedDateTo})}}">
                         &laquo; Trước
                     </a>
                 </li>
                 
                 <!-- Page Numbers -->
                 <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${currentPage == i} ? 'active'">
-                    <a class="page-link" th:href="@{/admin/audit-log(page=${i})}" th:text="${i + 1}">1</a>
+                    <a class="page-link" th:href="@{/admin/audit-log(page=${i}, eventType=${selectedEventType}, actor=${selectedActor}, dateFrom=${selectedDateFrom}, dateTo=${selectedDateTo})}" th:text="${i + 1}">1</a>
                 </li>
                 
                 <!-- Next Button -->
                 <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
-                    <a class="page-link" th:href="@{/admin/audit-log(page=${currentPage + 1})}">
+                    <a class="page-link" th:href="${currentPage >= totalPages - 1 ? '#' : @{/admin/audit-log(page=${currentPage + 1}, eventType=${selectedEventType}, actor=${selectedActor}, dateFrom=${selectedDateFrom}, dateTo=${selectedDateTo})}}">
                         Sau &raquo;
                     </a>
                 </li>

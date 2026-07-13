@@ -196,8 +196,31 @@ public class JobPostingController {
     }
 
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
-        model.addAttribute("job", jobPostingService.findById(id));
+    public String detail(@PathVariable Long id, HttpSession session, Model model) {
+        User currentUser = (User) session.getAttribute("currentUser");
+        String currentRole = (String) session.getAttribute("currentRole");
+        JobPosting job = jobPostingService.findById(id);
+
+        long applicationCount = applicationRepository.countByJobId(id);
+        
+        Map<String, Long> pipelineSummary = new HashMap<>();
+        pipelineSummary.put("APPLIED", applicationRepository.countByJobIdAndStatus(id, "APPLIED"));
+        pipelineSummary.put("SCREENING", applicationRepository.countByJobIdAndStatus(id, "SCREENING"));
+        pipelineSummary.put("INTERVIEW", applicationRepository.countByJobIdAndStatus(id, "INTERVIEW"));
+        pipelineSummary.put("OFFER", applicationRepository.countByJobIdAndStatus(id, "OFFER"));
+        pipelineSummary.put("HIRED", applicationRepository.countByJobIdAndStatus(id, "HIRED"));
+        pipelineSummary.put("REJECTED", applicationRepository.countByJobIdAndStatus(id, "REJECTED"));
+        pipelineSummary.put("WITHDRAWN", applicationRepository.countByJobIdAndStatus(id, "WITHDRAWN"));
+        
+        boolean isCreator = job.getCreatedBy() != null && job.getCreatedBy().getId().equals(currentUser.getId());
+        boolean canManage = "ADMIN".equalsIgnoreCase(currentRole) || 
+                            ("HR_MANAGER".equalsIgnoreCase(currentRole) && isCreator);
+                            
+        model.addAttribute("job", job);
+        model.addAttribute("applicationCount", applicationCount);
+        model.addAttribute("pipelineSummary", pipelineSummary);
+        model.addAttribute("canManage", canManage);
+        
         return "job/detail";
     }
 }

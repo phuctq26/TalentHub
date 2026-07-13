@@ -5,6 +5,7 @@ import com.talenthub.recruitment.entity.User;
 import com.talenthub.recruitment.service.AuthService;
 import com.talenthub.recruitment.service.PasswordResetService;
 import com.talenthub.recruitment.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -22,13 +23,16 @@ public class AuthController {
     private final UserService userService;
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
+    private final com.talenthub.recruitment.repository.AuditLogRepository auditLogRepository;
 
     public AuthController(UserService userService,
             AuthService authService,
-            PasswordResetService passwordResetService) {
+            PasswordResetService passwordResetService,
+            com.talenthub.recruitment.repository.AuditLogRepository auditLogRepository) {
         this.userService = userService;
         this.authService = authService;
         this.passwordResetService = passwordResetService;
+        this.auditLogRepository = auditLogRepository;
     }
 
     // ──────────────────────────────────────────────
@@ -48,8 +52,10 @@ public class AuthController {
             @RequestParam("usernameOrEmail") String usernameOrEmail,
             @RequestParam("password") String password,
             HttpSession session,
+            HttpServletRequest request,
             Model model) {
 
+        String ipAddress = request.getRemoteAddr();
         AuthService.UserHolder holder = new AuthService.UserHolder();
         AuthService.LoginResult result = authService.login(usernameOrEmail, password, holder);
 
@@ -59,11 +65,37 @@ public class AuthController {
                 session.setAttribute("currentUser", loggedInUser);
                 session.setAttribute("currentRole", loggedInUser.getRole().getName());
                 session.setMaxInactiveInterval(30 * 60);
+                com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+                log.setActorUser(loggedInUser);
+                log.setActorUsernameSnapshot(loggedInUser.getUsername());
+                log.setActorFullNameSnapshot(loggedInUser.getFullName());
+                log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.SIGN_IN_SUCCESS);
+                log.setDescription("Đăng nhập thành công");
+                log.setIpAddress(ipAddress);
+                auditLogRepository.save(log);
                 return redirectToDashboard(loggedInUser);
             case ACCOUNT_LOCKED:
+                com.talenthub.recruitment.entity.AuditLog lockLog = new com.talenthub.recruitment.entity.AuditLog();
+                lockLog.setActorUsernameSnapshot(usernameOrEmail);
+                lockLog.setActorFullNameSnapshot("Khách");
+                lockLog.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.ACCOUNT_LOCKED);
+                lockLog.setDescription("Tài khoản bị khóa do đăng nhập sai quá nhiều lần");
+                lockLog.setIpAddress(ipAddress);
+                auditLogRepository.save(lockLog);
+
                 model.addAttribute("lockoutError", true);
                 return "auth/login";
             case INVALID_CREDENTIALS:
+                com.talenthub.recruitment.entity.AuditLog failLog = new com.talenthub.recruitment.entity.AuditLog();
+                failLog.setActorUsernameSnapshot(usernameOrEmail);
+                failLog.setActorFullNameSnapshot("Khách");
+                failLog.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.SIGN_IN_FAILURE);
+                failLog.setDescription("Đăng nhập thất bại (sai thông tin)");
+                failLog.setIpAddress(ipAddress);
+                auditLogRepository.save(failLog);
+
+                model.addAttribute("genericError", true);
+                return "auth/login";
             case ACCOUNT_INACTIVE:
             default:
                 model.addAttribute("genericError", true);
@@ -71,6 +103,7 @@ public class AuthController {
         }
     }
 
+    // Removed duplicate redirectToDashboard
     @GetMapping("/logout")
     public String logout(HttpSession session, RedirectAttributes redirectAttributes) {
         session.invalidate();
@@ -245,7 +278,16 @@ public class AuthController {
         }
 
         try {
-            userService.registerCandidate(dto);
+            com.talenthub.recruitment.entity.User newUser = userService.registerCandidate(dto);
+            
+            com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+            log.setActorUser(newUser);
+            log.setActorUsernameSnapshot(newUser.getUsername());
+            log.setActorFullNameSnapshot(newUser.getFullName());
+            log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.ACCOUNT_CREATED);
+            log.setDescription("Tài khoản mới được đăng ký: " + newUser.getUsername());
+            auditLogRepository.save(log);
+            
             redirectAttributes.addFlashAttribute("successMessage", "Account created successfully. Please login.");
             return "redirect:/login";
         } catch (IllegalArgumentException e) {
