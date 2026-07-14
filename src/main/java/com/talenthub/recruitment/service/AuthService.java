@@ -56,13 +56,17 @@ public class AuthService {
         }
 
         User user = optUser.get();
+        userHolder.setUser(user);
 
-        // Kiểm tra tài khoản có bị vô hiệu hóa không
-        if (user.getStatus() != AccountStatus.ACTIVE) {
+        // Kiểm tra trạng thái tài khoản
+        if (user.getStatus() == AccountStatus.LOCKED) {
+            return LoginResult.ACCOUNT_LOCKED;
+        }
+        if (user.getStatus() == AccountStatus.INACTIVE) {
             return LoginResult.ACCOUNT_INACTIVE;
         }
 
-        // Kiểm tra đang bị khóa
+        // Kiểm tra đang bị khóa tạm thời
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(Instant.now())) {
             return LoginResult.ACCOUNT_LOCKED;
         }
