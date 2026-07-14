@@ -8,9 +8,9 @@
             <!-- Breadcrumb -->
             <nav aria-label="breadcrumb" class="mb-3">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item" th:if="${isInterviewer == null}"><a th:href="@{/jobs/manage}">Jobs</a></li>
+                    <li class="breadcrumb-item" th:if="${isInterviewer == null}"><a th:href="@{/jobs/manage}" hx-boost="false">Jobs</a></li>
                     <li class="breadcrumb-item" th:if="${isInterviewer == null && jobContext != null}">
-                        <a th:href="@{/jobs/manage/{id}(id=${jobContext.id})}" th:text="${jobContext.title}">Job Detail</a>
+                        <a th:href="@{/jobs/manage/{id}(id=${jobContext.id})}" hx-boost="false" th:text="${jobContext.title}">Job Detail</a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">Applications</li>
                 </ol>
@@ -42,7 +42,7 @@
                     </p>
                 </div>
                 <div th:if="${jobContext != null && isInterviewer == null}">
-                    <a th:href="@{/jobs/manage/{id}(id=${jobContext.id})}" class="btn btn-outline-secondary btn-sm">
+                    <a th:href="@{/jobs/manage/{id}(id=${jobContext.id})}" hx-boost="false" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-arrow-left me-1"></i> Chi tiết Job
                     </a>
                 </div>
@@ -179,7 +179,7 @@
                                         <td th:if="${selectedJobId == null && (applications == null || isInterviewer)}">
                                             <!-- If HR/Admin: Show clickable link -->
                                             <a th:if="${!isInterviewer}" th:href="@{/jobs/manage/{id}(id=${app.job.id})}"
-                                                class="text-dark hover-primary fw-medium" th:text="${app.job.title}">Job Title</a>
+                                                hx-boost="false" class="text-dark hover-primary fw-medium" th:text="${app.job.title}">Job Title</a>
                                             <!-- If Interviewer: Show plain text to avoid 403 Forbidden -->
                                             <span th:if="${isInterviewer}" class="text-dark fw-medium"
                                                 th:text="${app.job.title}">Job Title</span>
@@ -207,11 +207,13 @@
                                             <!-- Dynamic Details URL: Interviewer vs HR/Admin -->
                                             <a th:if="${isInterviewer}"
                                                 th:href="@{/interviewer/applications/{id}(id=${app.id})}"
+                                                hx-boost="false"
                                                 class="btn btn-sm btn-secondary px-3">
                                                 Open
                                             </a>
                                             <a th:if="${!isInterviewer}"
                                                 th:href="@{/hr/applications/{id}(id=${app.id})}"
+                                                hx-boost="false"
                                                 class="btn btn-sm btn-secondary px-3">
                                                 Open
                                             </a>
