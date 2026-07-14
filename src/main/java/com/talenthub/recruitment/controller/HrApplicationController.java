@@ -22,6 +22,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -121,6 +122,13 @@ public class HrApplicationController {
         // Thiết lập thông tin ngữ cảnh công việc nếu đang lọc theo một Job cụ thể
         if (jobId != null) {
             JobPosting job = jobPostingService.findById(jobId);
+            if (hrManagerId != null) {
+                User creator = job.getCreatedBy();
+                Long creatorId = (creator != null) ? creator.getId() : null;
+                if (creatorId == null || !creatorId.equals(hrManagerId)) {
+                    throw new ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Access denied");
+                }
+            }
             model.addAttribute("jobContext", job);
         }
 
@@ -169,7 +177,7 @@ public class HrApplicationController {
             User creator = application.getJob().getCreatedBy();
             Long creatorId = (creator != null) ? creator.getId() : null;
             if (creatorId == null || !creatorId.equals(hrManagerId)) {
-                return "redirect:/hr/applications";
+                throw new ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Access denied");
             }
         }
 
@@ -196,6 +204,52 @@ public class HrApplicationController {
         model.addAttribute("activeTab", "applications");
 
         return "hr/application-detail";
+    }
+
+    /**
+     * Thêm ghi chú nội bộ cho hồ sơ ứng tuyển (SCR-17).
+     * Hỗ trợ HTMX để cập nhật danh sách ghi chú mà không cần tải lại toàn bộ trang.
+     */
+    @PostMapping("/hr/applications/{id}/note")
+    public String addApplicationNote(
+            @PathVariable Long id,
+            @RequestParam("noteContent") String noteContent,
+            @RequestHeader(value = "HX-Request", required = false) String hxRequest,
+            HttpSession session,
+            Model model) {
+
+        User currentUser = (User) session.getAttribute("currentUser");
+        String currentRole = (String) session.getAttribute("currentRole");
+
+        Long hrManagerId = null;
+        if ("HR_MANAGER".equalsIgnoreCase(currentRole)) {
+            hrManagerId = currentUser.getId();
+        }
+
+        Application application = applicationService.getApplicationById(id);
+
+        // Kiểm tra bảo mật: Nếu là HR Manager, chỉ cho phép thêm ghi chú cho hồ sơ thuộc công việc của mình
+        if (hrManagerId != null) {
+            User creator = application.getJob().getCreatedBy();
+            Long creatorId = (creator != null) ? creator.getId() : null;
+            if (creatorId == null || !creatorId.equals(hrManagerId)) {
+                throw new ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Access denied");
+            }
+        }
+
+        // Lưu ghi chú nội bộ mới
+        applicationService.addNote(id, currentUser, noteContent.trim());
+
+        // Lấy danh sách ghi chú mới để cập nhật cho View
+        List<ApplicationNote> notes = applicationService.getNotes(id);
+        model.addAttribute("notes", notes);
+        model.addAttribute("app", application);
+
+        if (hxRequest != null) {
+            return "hr/application-detail :: notes-list";
+        }
+
+        return "redirect:/hr/applications/" + id;
     }
 
     /**
@@ -383,6 +437,7 @@ public class HrApplicationController {
 
         // Đưa thông tin vào Model để hiển thị ngoài giao diện Thymeleaf
         model.addAttribute("applications", applications);
+        model.addAttribute("isInterviewer", true);
         model.addAttribute("title", "Đánh giá ứng viên");
         model.addAttribute("activeTab", "interviewer-apps");
 
