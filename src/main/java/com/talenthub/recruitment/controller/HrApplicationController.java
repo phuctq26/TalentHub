@@ -44,14 +44,18 @@ public class HrApplicationController {
     private final ApplicationService applicationService;
     private final JobPostingService jobPostingService;
     private final com.talenthub.recruitment.repository.InterviewRepository interviewRepository;
+    private final com.talenthub.recruitment.repository.AuditLogRepository auditLogRepository;
 
     public HrApplicationController(
             ApplicationService applicationService,
             JobPostingService jobPostingService,
-            com.talenthub.recruitment.repository.InterviewRepository interviewRepository) {
+            com.talenthub.recruitment.repository.InterviewRepository interviewRepository,
+            com.talenthub.recruitment.repository.AuditLogRepository auditLogRepository
+    ) {
         this.applicationService = applicationService;
         this.jobPostingService = jobPostingService;
         this.interviewRepository = interviewRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     /**
@@ -291,6 +295,15 @@ public class HrApplicationController {
         try {
             // Thực hiện thay đổi trạng thái của hồ sơ ứng tuyển
             applicationService.changeStatus(id, status);
+            
+            com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+            log.setActorUser(currentUser);
+            log.setActorUsernameSnapshot(currentUser.getUsername());
+            log.setActorFullNameSnapshot(currentUser.getFullName());
+            log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.APPLICATION_STATUS_CHANGED);
+            log.setDescription("Chuyển trạng thái hồ sơ #" + id + " của " + application.getCandidate().getFullName() + " sang " + status.name());
+            auditLogRepository.save(log);
+            
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái ứng viên thành công.");
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể cập nhật trạng thái: " + ex.getMessage());
@@ -314,6 +327,15 @@ public class HrApplicationController {
         // Lấy tệp CV trên máy chủ, hệ thống sẽ kiểm tra quyền truy cập ở tầng dịch vụ
         // (Service layer)
         CandidateCvFile cvFile = applicationService.getCvForHrOrInterviewer(id, currentUser.getId(), currentRole);
+
+        // Ghi audit log
+        com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+        log.setActorUser(currentUser);
+        log.setActorUsernameSnapshot(currentUser.getUsername());
+        log.setActorFullNameSnapshot(currentUser.getFullName());
+        log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.CV_DOWNLOADED);
+        log.setDescription("Tải CV hồ sơ #" + id);
+        auditLogRepository.save(log);
 
         return ResponseEntity.ok()
                 .contentType(resolveMediaType(cvFile.contentType()))
@@ -454,7 +476,16 @@ public class HrApplicationController {
 
         interviewRepository.save(interview);
 
-        redirectAttributes.addFlashAttribute("successMessage", "Evaluation submitted. Thank you.");
+        // Ghi audit log
+        com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+        log.setActorUser(currentUser);
+        log.setActorUsernameSnapshot(currentUser.getUsername());
+        log.setActorFullNameSnapshot(currentUser.getFullName());
+        log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.EVALUATION_SUBMITTED);
+        log.setDescription("Đã nộp đánh giá phỏng vấn #" + interviewId + " - Điểm: " + rating);
+        auditLogRepository.save(log);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Đã nộp đánh giá phỏng vấn thành công.");
         return "redirect:/interviewer/applications/" + interview.getApplication().getId();
     }
 

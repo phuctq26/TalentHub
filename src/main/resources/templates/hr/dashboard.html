@@ -7,11 +7,11 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="mb-1 fw-bold text-dark">Bảng điều khiển Nhân sự</h2>
-            <p class="text-muted mb-0">Theo dõi tiến độ tuyển dụng, hồ sơ ứng tuyển và lịch phỏng vấn thời gian thực (SCR-06)</p>
+            <p class="text-muted mb-0">Theo dõi tiến độ tuyển dụng, hồ sơ ứng tuyển và lịch phỏng vấn thời gian thực</p>
         </div>
         <div>
             <a th:href="@{/jobs/manage/new}" class="btn btn-primary">
-                <i class="bi bi-plus-lg me-1"></i> Tạo Job mới (SCR-11)
+                <i class="bi bi-plus-lg me-1"></i> Tạo Job mới
             </a>
         </div>
     </div>
@@ -103,11 +103,11 @@
                     <tbody>
                         <tr th:each="job : ${activeJobs}">
                             <td class="ps-3">
-                                <a th:href="@{/hr/jobs/{id}/pipeline-report(id=${job.id})}" th:text="${job.title}" class="fw-bold text-decoration-none text-primary">Java Developer</a>
+                                <a th:href="@{/jobs/manage/{id}(id=${job.id})}" th:text="${job.title}" class="fw-bold text-decoration-none text-primary">Java Developer</a>
                             </td>
                             <td th:text="${job.department}">Phòng ban</td>
                             <td>
-                                <a th:href="@{/hr/jobs/{id}/pipeline-report(id=${job.id})}" class="badge bg-light text-dark fw-bold border text-decoration-none" th:text="${jobAppCounts.get(job.id)} + ' Đơn'">0 Đơn</a>
+                                <span class="badge bg-light text-dark fw-bold border" th:text="${jobAppCounts.get(job.id)} + ' Đơn'">0 Đơn</span>
                             </td>
                             <td class="pe-3 text-secondary small" th:text="${job.applicationDeadline != null ? job.applicationDeadline : '-'}">Hạn nộp</td>
                         </tr>

@@ -2,11 +2,9 @@ package com.talenthub.recruitment.controller;
 
 import com.talenthub.recruitment.entity.Application;
 import com.talenthub.recruitment.entity.AuditLog;
+import com.talenthub.recruitment.entity.JobPosting;
 import com.talenthub.recruitment.entity.User;
-import com.talenthub.recruitment.repository.ApplicationRepository;
-import com.talenthub.recruitment.repository.AuditLogRepository;
-import com.talenthub.recruitment.repository.JobPostingRepository;
-import com.talenthub.recruitment.repository.UserRepository;
+import com.talenthub.recruitment.repository.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,16 +27,19 @@ public class AdminDashboardController {
     private final AuditLogRepository auditLogRepository;
     private final JobPostingRepository jobPostingRepository;
     private final ApplicationRepository applicationRepository;
+    private final InterviewRepository interviewRepository;
 
     public AdminDashboardController(
             UserRepository userRepository,
             AuditLogRepository auditLogRepository,
             JobPostingRepository jobPostingRepository,
-            ApplicationRepository applicationRepository) {
+            ApplicationRepository applicationRepository,
+            InterviewRepository interviewRepository) {
         this.userRepository = userRepository;
         this.auditLogRepository = auditLogRepository;
         this.jobPostingRepository = jobPostingRepository;
         this.applicationRepository = applicationRepository;
+        this.interviewRepository = interviewRepository;
     }
 
     @GetMapping("/dashboard")
@@ -74,19 +75,26 @@ public class AdminDashboardController {
         model.addAttribute("recentLogs", recentLogs);
 
         // 4. Tổng quan tuyển dụng (Recruitment Summary)
-        long activeJobs = jobPostingRepository.countActiveJobs();
-        long totalApplications = applicationRepository.count();
+        long activeJobs = jobPostingRepository.countActiveJobsForHrOrAdmin(null);
+        long totalApplications = applicationRepository.countAwaitingReviewForHrOrAdmin(null);
         long interviewStage = applicationRepository.countInterviewStage();
+        long upcomingInterviewCount = interviewRepository.countUpcomingInterviewsForAdmin();
         long hiredCount = applicationRepository.countHired();
 
         model.addAttribute("activeJobs", activeJobs);
         model.addAttribute("totalApplications", totalApplications);
         model.addAttribute("interviewStage", interviewStage);
+        model.addAttribute("upcomingInterviewCount", upcomingInterviewCount);
         model.addAttribute("hiredCount", hiredCount);
 
-        // 5. Đơn ứng tuyển gần đây (Recent Applications) - Lấy tối đa 5 dòng
-        List<Application> recentApplications = applicationRepository.findRecentApplications(PageRequest.of(0, 5));
-        model.addAttribute("recentApplications", recentApplications);
+        List<JobPosting> activeJobsList = jobPostingRepository.findActiveJobsForHrOrAdmin(null);
+        Map<Long, Long> jobAppCounts = new HashMap<>();
+        for (JobPosting job : activeJobsList) {
+            long count = applicationRepository.countByJobId(job.getId());
+            jobAppCounts.put(job.getId(), count);
+        }
+        model.addAttribute("activeJobsList", activeJobsList);
+        model.addAttribute("jobAppCounts", jobAppCounts);
 
         return "admin/dashboard";
     }
@@ -94,16 +102,51 @@ public class AdminDashboardController {
     @GetMapping("/audit-log")
     public String viewAuditLogs(
             @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) String actor,
+            @RequestParam(required = false) String dateFrom,
+            @RequestParam(required = false) String dateTo,
             HttpSession session,
             Model model) {
+
+        java.time.LocalDate parsedDateFrom = null;
+        java.time.LocalDate parsedDateTo = null;
+
+        if (dateFrom != null && !dateFrom.trim().isEmpty()) {
+            try {
+                parsedDateFrom = java.time.LocalDate.parse(dateFrom);
+            } catch (Exception e) {
+                // Ignore parse errors
+            }
+        }
+
+        if (dateTo != null && !dateTo.trim().isEmpty()) {
+            try {
+                parsedDateTo = java.time.LocalDate.parse(dateTo);
+            } catch (Exception e) {
+                // Ignore parse errors
+            }
+        }
+
+        org.springframework.data.jpa.domain.Specification<AuditLog> spec =
+                com.talenthub.recruitment.repository.AuditLogSpecification.getFilterSpecification(
+                        eventType, actor, parsedDateFrom, parsedDateTo);
+
         Page<AuditLog> logPage = auditLogRepository.findAll(
-                PageRequest.of(page, 20, Sort.by("createdAt").descending())
+                spec,
+                PageRequest.of(page, 50, Sort.by("createdAt").descending())
         );
 
         model.addAttribute("logs", logPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", logPage.getTotalPages());
         model.addAttribute("totalItems", logPage.getTotalElements());
+
+        // Keep filters in UI
+        model.addAttribute("selectedEventType", eventType);
+        model.addAttribute("selectedActor", actor);
+        model.addAttribute("selectedDateFrom", dateFrom);
+        model.addAttribute("selectedDateTo", dateTo);
 
         return "admin/audit-log";
     }

@@ -4,6 +4,8 @@ import org.springframework.data.domain.Page;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PipelineReportResponse {
 
@@ -27,6 +29,8 @@ public class PipelineReportResponse {
     private double interviewRate;
     private double offerRate;
     private double hiringRate;
+    private long maxStageCount;
+    private List<StageRow> stageRows = new ArrayList<>();
     private Page<ApplicationRow> applicationPage;
 
     public Long getJobId() {
@@ -189,6 +193,22 @@ public class PipelineReportResponse {
         this.hiringRate = hiringRate;
     }
 
+    public long getMaxStageCount() {
+        return maxStageCount;
+    }
+
+    public void setMaxStageCount(long maxStageCount) {
+        this.maxStageCount = maxStageCount;
+    }
+
+    public List<StageRow> getStageRows() {
+        return stageRows;
+    }
+
+    public void setStageRows(List<StageRow> stageRows) {
+        this.stageRows = stageRows;
+    }
+
     public Page<ApplicationRow> getApplicationPage() {
         return applicationPage;
     }
@@ -201,6 +221,8 @@ public class PipelineReportResponse {
 
         private String candidateName;
         private String status;
+        private long daysInStage;
+        private String assignedInterviewer;
         private Instant appliedDate;
         private Instant lastUpdated;
 
@@ -220,6 +242,22 @@ public class PipelineReportResponse {
             this.status = status;
         }
 
+        public long getDaysInStage() {
+            return daysInStage;
+        }
+
+        public void setDaysInStage(long daysInStage) {
+            this.daysInStage = daysInStage;
+        }
+
+        public String getAssignedInterviewer() {
+            return assignedInterviewer;
+        }
+
+        public void setAssignedInterviewer(String assignedInterviewer) {
+            this.assignedInterviewer = assignedInterviewer;
+        }
+
         public Instant getAppliedDate() {
             return appliedDate;
         }
@@ -234,6 +272,50 @@ public class PipelineReportResponse {
 
         public void setLastUpdated(Instant lastUpdated) {
             this.lastUpdated = lastUpdated;
+        }
+    }
+
+    public static class StageRow {
+
+        private String name;
+        private long count;
+        private int percent;
+
+        public StageRow(String name, long count, long maxStageCount) {
+            this.name = name;
+            this.count = count;
+            this.percent = maxStageCount == 0 ? 0 : (int) Math.round((double) count / maxStageCount * 100);
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public long getCount() {
+            return count;
+        }
+
+        public int getPercent() {
+            return percent;
+        }
+    }
+
+    public static class JobOption {
+
+        private Long id;
+        private String title;
+
+        public JobOption(Long id, String title) {
+            this.id = id;
+            this.title = title;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public String getTitle() {
+            return title;
         }
     }
 }

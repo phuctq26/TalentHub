@@ -1,50 +1,67 @@
-<!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Chi tiết tin tuyển dụng</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, 'Chi tiết Công việc', 'jobs')}">
 <body>
-
+<main th:fragment="main-content">
+    <style>
+        .pipeline-stage {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-right: 1px solid #dee2e6;
+        }
+        .pipeline-stage:last-child {
+            border-right: none;
+        }
+        .pipeline-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+    </style>
 <div class="container mt-4">
 
-    <a th:href="@{/jobs/manage}" class="btn btn-secondary mb-3">
-        Quay lại danh sách
-    </a>
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/jobs/manage}">Jobs</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${job.title}">Job Detail</li>
+        </ol>
+    </nav>
+    
+    <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
 
-    <div class="card">
-        <div class="card-header">
-            <h3 th:text="${job.title}">Tiêu đề công việc</h3>
+    <div th:if="${job.status.name() == 'CLOSED'}" class="alert alert-warning" role="alert">
+        This posting is closed and no longer accepting applications.
+    </div>
 
-            <span class="badge"
-                  th:classappend="${job.status.name() == 'DRAFT'} ? ' bg-secondary' :
-                                  (${job.status.name() == 'ACTIVE'} ? ' bg-success' : ' bg-danger')"
-                  th:text="${job.status}">
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h1 class="h3 mb-0" style="display: inline-block;">
+                <span th:text="${job.title}"></span>
+                <span class="badge ms-2"
+                      th:classappend="${job.status.name() == 'DRAFT'} ? 'bg-secondary' :
+                                      (${job.status.name() == 'ACTIVE'} ? 'bg-success' : 'bg-danger')"
+                      th:text="${job.status}">
+                </span>
+            </h1>
+            <span class="badge bg-info text-dark fs-6">
+                Applications: <span th:text="${applicationCount}">0</span>
             </span>
         </div>
 
         <div class="card-body">
-
-            <p>
-                <strong>Phòng ban:</strong>
-                <span th:text="${job.department}"></span>
-            </p>
-
-            <p>
-                <strong>Địa điểm:</strong>
-                <span th:text="${job.location}"></span>
-            </p>
-
-            <p>
-                <strong>Mức lương:</strong>
-                <span th:text="${job.salaryRange != null && !#strings.isEmpty(job.salaryRange) ? job.salaryRange : 'Chưa cập nhật'}"></span>
-            </p>
-
-            <p>
-                <strong>Hạn nộp hồ sơ:</strong>
-                <span th:text="${job.applicationDeadline != null ? job.applicationDeadline : 'Chưa có'}"></span>
-            </p>
+            <!-- Job Info Panel -->
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Phòng ban:</strong> <span th:text="${job.department}"></span></p>
+                    <p><strong>Địa điểm:</strong> <span th:text="${job.location}"></span></p>
+                    <p><strong>Mức lương:</strong> <span th:text="${job.salaryRange != null && !#strings.isEmpty(job.salaryRange) ? job.salaryRange : 'Chưa cập nhật'}"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Hạn nộp hồ sơ:</strong> <span th:text="${job.applicationDeadline != null ? job.applicationDeadline : 'Chưa có'}"></span></p>
+                    <p><strong>Ngày tạo:</strong> <span th:text="${job.createdAt != null ? job.formattedCreatedAt : 'N/A'}"></span></p>
+                    <p><strong>Người tạo:</strong> <span th:text="${job.createdBy != null ? job.createdBy.fullName : 'N/A'}"></span></p>
+                </div>
+            </div>
 
             <hr>
 
@@ -53,25 +70,62 @@
 
             <h5>Yêu cầu công việc</h5>
             <p th:text="${job.requirements != null && !#strings.isEmpty(job.requirements) ? job.requirements : 'Không có'}"></p>
-
+            
             <hr>
 
-            <div class="d-flex gap-2 flex-wrap">
+            <!-- Pipeline Summary Chart -->
+            <h5 class="mb-3">Pipeline Summary</h5>
+            <div class="d-flex border rounded mb-4 bg-light flex-wrap">
+                <div class="pipeline-stage">
+                    <div class="text-muted small">Applied</div>
+                    <div class="pipeline-number text-primary" th:text="${pipelineSummary['APPLIED']}">0</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="text-muted small">Screening</div>
+                    <div class="pipeline-number text-info" th:text="${pipelineSummary['SCREENING']}">0</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="text-muted small">Interview</div>
+                    <div class="pipeline-number text-warning" th:text="${pipelineSummary['INTERVIEW']}">0</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="text-muted small">Offer</div>
+                    <div class="pipeline-number text-success" th:text="${pipelineSummary['OFFER']}">0</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="text-muted small">Hired</div>
+                    <div class="pipeline-number text-success" th:text="${pipelineSummary['HIRED']}">0</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="text-muted small">Rejected</div>
+                    <div class="pipeline-number text-danger" th:text="${pipelineSummary['REJECTED']}">0</div>
+                </div>
+                <div class="pipeline-stage border-0">
+                    <div class="text-muted small">Withdrawn</div>
+                    <div class="pipeline-number text-secondary" th:text="${pipelineSummary['WITHDRAWN']}">0</div>
+                </div>
+            </div>
 
-                <a th:href="@{/hr/jobs/{id}/applications(id=${job.id})}"
-                   class="btn btn-primary">
-                    Danh sách ứng tuyển
-                </a>
+            <!-- View Applications / Report Tabs -->
+            <ul class="nav nav-tabs mb-4">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/hr/jobs/{id}/applications(id=${job.id})}">View Applications</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/hr/jobs/{id}/pipeline-report(id=${job.id})}">Report</a>
+                </li>
+            </ul>
 
-                <a th:href="@{/hr/jobs/{id}/pipeline-report(id=${job.id})}"
-                   class="btn btn-outline-primary">
-                    Pipeline Report
-                </a>
-
+            <!-- Actions -->
+            <div class="d-flex gap-2 flex-wrap" th:if="${canManage}">
+                
                 <a th:if="${job.status.name() == 'DRAFT' || job.status.name() == 'ACTIVE'}"
                    th:href="@{/jobs/manage/{id}/edit(id=${job.id})}"
-                   class="btn btn-warning">
-                    Sửa
+                   class="btn btn-secondary">
+                    Edit
                 </a>
 
                 <form th:if="${job.status.name() == 'DRAFT'}"
@@ -80,7 +134,7 @@
                     <button type="submit"
                             class="btn btn-primary"
                             onclick="return confirm('Bạn có chắc muốn đăng tin này không?')">
-                        Đăng tin
+                        Publish
                     </button>
                 </form>
 
@@ -88,19 +142,19 @@
                       th:action="@{/jobs/manage/{id}/close(id=${job.id})}"
                       method="post">
                     <button type="submit"
-                            class="btn btn-secondary"
-                            onclick="return confirm('Bạn có chắc muốn đóng tin này không?')">
-                        Đóng tin
+                            class="btn btn-danger"
+                            onclick="return confirm('Closing will stop accepting new applications. Existing applications are not affected.')">
+                        Close
                     </button>
                 </form>
 
-                <form th:if="${job.status.name() == 'DRAFT'}"
+                <form th:if="${job.status.name() == 'DRAFT' && applicationCount == 0}"
                       th:action="@{/jobs/manage/{id}/delete(id=${job.id})}"
                       method="post">
                     <button type="submit"
                             class="btn btn-danger"
                             onclick="return confirm('Bạn có chắc muốn xóa tin này không?')">
-                        Xóa
+                        Delete
                     </button>
                 </form>
 
@@ -111,5 +165,7 @@
 
 </div>
 
+</div>
+</main>
 </body>
 </html>

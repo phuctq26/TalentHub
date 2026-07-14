@@ -27,7 +27,7 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "actor_user_id")
     private User actorUser;
 
@@ -41,6 +41,7 @@ public class AuditLog {
 
     @NotNull
     @Enumerated(EnumType.STRING)
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NAMED_ENUM)
     @Column(name = "event_type", nullable = false, columnDefinition = "audit_event_type")
     private AuditEventType eventType;
 
@@ -48,6 +49,7 @@ public class AuditLog {
     @Column(nullable = false, columnDefinition = "text")
     private String description;
 
+    @org.hibernate.annotations.ColumnTransformer(write = "CAST(? AS inet)")
     @Column(name = "ip_address", columnDefinition = "inet")
     private String ipAddress;
 
@@ -113,6 +115,14 @@ public class AuditLog {
 
     public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
+    }
+
+    @jakarta.persistence.Transient
+    public String getFormattedCreatedAt() {
+        if (createdAt == null) return "-";
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                .withZone(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
+        return formatter.format(createdAt);
     }
 
     public Instant getCreatedAt() {

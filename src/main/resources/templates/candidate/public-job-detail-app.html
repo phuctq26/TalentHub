@@ -1,0 +1,74 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, 'Job Detail', 'candidate-jobs')}">
+<body>
+<main th:fragment="main-content">
+
+    <a th:href="@{/jobs}" class="btn btn-outline-secondary mb-4">
+        <i class="bi bi-arrow-left me-1"></i> Back to Jobs
+    </a>
+
+    <div class="card border-0 shadow-sm">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-4">
+            <div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="job-type-badge" th:text="${job.department}">Engineering</span>
+                </div>
+                <h2 class="mb-2 fw-bold text-dark" th:text="${job.title}">Java Developer</h2>
+                <p class="subtitle mb-0">
+                    <i class="bi bi-geo-alt me-1"></i>
+                    <span th:text="${job.location}">Hanoi</span>
+                </p>
+            </div>
+            <a th:href="@{/jobs/{id}/apply(id=${job.id})}" class="btn btn-primary">
+                <i class="bi bi-send me-1"></i> Apply Now
+            </a>
+        </div>
+
+        <div class="detail-grid">
+            <div class="detail-item">
+                <div class="detail-label">Salary range</div>
+                <div class="detail-value"
+                     th:text="${job.salaryRange != null && !#strings.isEmpty(job.salaryRange) ? job.salaryRange : 'Negotiable'}">
+                    Negotiable
+                </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Application deadline</div>
+                <div class="detail-value"
+                     th:text="${job.applicationDeadline != null ? #temporals.format(job.applicationDeadline, 'dd/MM/yyyy') : 'Open'}">
+                    Open
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <section class="mb-4">
+            <h3 class="h5">Job Description</h3>
+            <p class="mb-0 text-secondary" style="white-space: pre-line;" th:text="${job.description}">
+                Job description
+            </p>
+        </section>
+
+        <section>
+            <h3 class="h5">Requirements</h3>
+            <p class="mb-0 text-secondary"
+               style="white-space: pre-line;"
+               th:text="${job.requirements != null && !#strings.isEmpty(job.requirements) ? job.requirements : 'No specific requirements provided.'}">
+                Requirements
+            </p>
+        </section>
+
+        <div class="form-actions">
+            <a th:href="@{/jobs/{id}/apply(id=${job.id})}" class="btn btn-primary">
+                <i class="bi bi-send me-1"></i> Apply Now
+            </a>
+            <a th:href="@{/jobs}" class="btn btn-secondary">
+                View Other Jobs
+            </a>
+        </div>
+    </div>
+
+</main>
+</body>
+</html>

@@ -25,10 +25,12 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final RoleRepository roleRepository;
+    private final com.talenthub.recruitment.repository.AuditLogRepository auditLogRepository;
 
-    public UserController(UserService userService, RoleRepository roleRepository) {
+    public UserController(UserService userService, RoleRepository roleRepository, com.talenthub.recruitment.repository.AuditLogRepository auditLogRepository) {
         this.userService = userService;
         this.roleRepository = roleRepository;
+        this.auditLogRepository = auditLogRepository;
     }
 
     private List<Role> getManageableRoles() {
@@ -77,7 +79,7 @@ public class UserController {
     public String editUserForm(@PathVariable Long id, Model model) {
         UserForm form = userService.getFormById(id);
         model.addAttribute("userForm", form);
-        model.addAttribute("roles", getManageableRoles());
+        model.addAttribute("roles", roleRepository.findAll());
         model.addAttribute("statuses", AccountStatus.values());
         model.addAttribute("isEdit", true);
         return "admin/user-form";
@@ -90,24 +92,51 @@ public class UserController {
             Model model,
             RedirectAttributes redirectAttributes) {
 
-        // Validate password required on create
-        if (form.getId() == null && (form.getPassword() == null || form.getPassword().trim().isEmpty())) {
-            result.rejectValue("password", "NotEmpty", "Mật khẩu không được để trống khi tạo mới.");
+        // Validate password on Create (Required + Complexity)
+        if (form.getId() == null) {
+            if (form.getPassword() == null || form.getPassword().trim().isEmpty()) {
+                result.rejectValue("password", "NotEmpty", "Mật khẩu không được để trống khi tạo mới.");
+            } else if (!form.getPassword().matches("^(?=.*[0-9])(?=.*[A-Z]).{8,}$")) {
+                result.rejectValue("password", "Pattern", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa và 1 chữ số.");
+            }
+        } else {
+            // Validate password on Edit (Optional + Complexity if not blank)
+            if (form.getPassword() != null && !form.getPassword().trim().isEmpty()) {
+                if (!form.getPassword().matches("^(?=.*[0-9])(?=.*[A-Z]).{8,}$")) {
+                    result.rejectValue("password", "Pattern", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ hoa và 1 chữ số.");
+                }
+            }
         }
 
         if (result.hasErrors()) {
-            model.addAttribute("roles", getManageableRoles());
+            model.addAttribute("roles", form.getId() != null ? roleRepository.findAll() : getManageableRoles());
             model.addAttribute("statuses", AccountStatus.values());
             model.addAttribute("isEdit", form.getId() != null);
             return "admin/user-form";
         }
 
         try {
+            boolean isNewUser = (form.getId() == null);
             userService.save(form);
+            
+            if (isNewUser) {
+                com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+                log.setActorUsernameSnapshot("admin");
+                log.setActorFullNameSnapshot("System Admin");
+                log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.ACCOUNT_CREATED);
+                log.setDescription("Admin tạo tài khoản mới: " + form.getUsername());
+                auditLogRepository.save(log);
+            }
+            
             redirectAttributes.addFlashAttribute("successMessage", "Lưu thông tin người dùng thành công!");
         } catch (Exception e) {
-            result.rejectValue("username", "Duplicate", e.getMessage());
-            model.addAttribute("roles", getManageableRoles());
+            String msg = e.getMessage();
+            if (msg != null && msg.contains("Email")) {
+                result.rejectValue("email", "Duplicate", msg);
+            } else {
+                result.rejectValue("username", "Duplicate", msg);
+            }
+            model.addAttribute("roles", form.getId() != null ? roleRepository.findAll() : getManageableRoles());
             model.addAttribute("statuses", AccountStatus.values());
             model.addAttribute("isEdit", form.getId() != null);
             return "admin/user-form";
@@ -117,14 +146,25 @@ public class UserController {
     }
 
     @PostMapping("/{id}/unlock")
-    public String unlockUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String unlockUser(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         try {
+            User targetUser = userService.findById(id);
             userService.unlock(id);
+            
+            User currentUser = (User) session.getAttribute("currentUser");
+            com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+            log.setActorUser(currentUser);
+            log.setActorUsernameSnapshot(currentUser != null ? currentUser.getUsername() : "system");
+            log.setActorFullNameSnapshot(currentUser != null ? currentUser.getFullName() : "System");
+            log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.ACCOUNT_UNLOCKED);
+            log.setDescription("Mở khóa tài khoản: " + targetUser.getUsername());
+            auditLogRepository.save(log);
+            
             redirectAttributes.addFlashAttribute("successMessage", "Mở khóa tài khoản thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể mở khóa tài khoản: " + e.getMessage());
         }
-        return "redirect:/admin/users";
+        return "redirect:/admin/users?status=ACTIVE";
     }
 
     @PostMapping("/{id}/activate")
@@ -135,18 +175,29 @@ public class UserController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể kích hoạt tài khoản: " + e.getMessage());
         }
-        return "redirect:/admin/users";
+        return "redirect:/admin/users?status=ACTIVE";
     }
 
     @PostMapping("/{id}/deactivate")
-    public String deactivateUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String deactivateUser(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         try {
+            User targetUser = userService.findById(id);
             userService.deactivate(id);
+            
+            User currentUser = (User) session.getAttribute("currentUser");
+            com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+            log.setActorUser(currentUser);
+            log.setActorUsernameSnapshot(currentUser != null ? currentUser.getUsername() : "system");
+            log.setActorFullNameSnapshot(currentUser != null ? currentUser.getFullName() : "System");
+            log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.ACCOUNT_DEACTIVATED);
+            log.setDescription("Vô hiệu hóa tài khoản: " + targetUser.getUsername());
+            auditLogRepository.save(log);
+            
             redirectAttributes.addFlashAttribute("successMessage", "Vô hiệu hóa tài khoản thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể vô hiệu hóa tài khoản: " + e.getMessage());
         }
-        return "redirect:/admin/users";
+        return "redirect:/admin/users?status=INACTIVE";
     }
 
     @GetMapping("/{id}")

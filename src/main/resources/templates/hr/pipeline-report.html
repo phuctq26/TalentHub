@@ -3,235 +3,202 @@
 <body>
 <main th:fragment="main-content">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
         <div>
             <h2 class="mb-1 fw-bold text-dark">Pipeline Report</h2>
-            <p class="text-muted mb-0" th:text="${report.jobTitle}">Java Developer</p>
+            <p class="text-muted mb-0"
+               th:text="${report != null ? report.jobTitle : 'Select a job posting to view the pipeline'}">
+                Select a job posting to view the pipeline
+            </p>
         </div>
-        <a th:href="@{/hr/dashboard}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
-        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a th:href="@{/hr/dashboard}" class="btn btn-outline-secondary">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+            </a>
+            <a th:if="${report != null && !showJobSelector}"
+               th:href="@{/jobs/manage/{id}(id=${report.jobId})}"
+               class="btn btn-outline-secondary">
+                <i class="bi bi-briefcase me-1"></i> Job Detail
+            </a>
+        </div>
     </div>
 
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-white border-0 py-3">
-            <h5 class="mb-0 fw-bold text-dark">
-                <i class="bi bi-briefcase text-primary me-1"></i> Job Information
-            </h5>
-        </div>
+    <div class="card border-0 shadow-sm mb-4" th:if="${showJobSelector}">
         <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <div class="text-muted small">Job title</div>
-                    <div class="fw-semibold" th:text="${report.jobTitle}">Java Developer</div>
+            <form th:action="@{/hr/reports}" method="get" class="row g-3 align-items-end">
+                <div class="col-md-8 col-lg-6">
+                    <label for="jobId" class="form-label fw-semibold">Job posting</label>
+                    <select id="jobId" name="jobId" class="form-select" onchange="this.form.submit()">
+                        <option th:each="job : ${jobOptions}"
+                                th:value="${job.id}"
+                                th:selected="${report != null && job.id.equals(report.jobId)}"
+                                th:text="${job.title}">
+                            Java Developer
+                        </option>
+                    </select>
                 </div>
-                <div class="col-md-4">
-                    <div class="text-muted small">Department</div>
-                    <div class="fw-semibold" th:text="${report.department}">Engineering</div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-primary">
+                        View Report
+                    </button>
                 </div>
-                <div class="col-md-4">
-                    <div class="text-muted small">Recruiter</div>
-                    <div class="fw-semibold" th:text="${report.recruiterName}">Recruiter</div>
-                </div>
-                <div class="col-md-4">
-                    <div class="text-muted small">Job status</div>
-                    <span class="badge"
-                          th:classappend="${report.jobStatus == 'ACTIVE'} ? ' bg-success' :
-                            (${report.jobStatus == 'CLOSED'} ? ' bg-danger' : ' bg-secondary')"
-                          th:text="${report.jobStatus}">ACTIVE</span>
-                </div>
-                <div class="col-md-4">
-                    <div class="text-muted small">Number of vacancies</div>
-                    <div class="fw-semibold" th:text="${report.numberOfVacancies}">N/A</div>
-                </div>
-                <div class="col-md-4">
-                    <div class="text-muted small">Posted date</div>
-                    <div class="fw-semibold"
-                         th:text="${report.postedDate != null ? #temporals.format(report.postedDate, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">
-                        -
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="text-muted small">Application deadline</div>
-                    <div class="fw-semibold" th:text="${report.applicationDeadline != null ? report.applicationDeadline : '-'}">-</div>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-muted small">Total applications</div>
-                    <h3 class="fw-bold mb-0 text-primary" th:text="${report.totalApplications}">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-muted small">Screening</div>
-                    <h3 class="fw-bold mb-0 text-info" th:text="${report.screeningCount}">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-muted small">Offered</div>
-                    <h3 class="fw-bold mb-0 text-warning" th:text="${report.offeredCount}">0</h3>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                    <div class="text-muted small">Hired</div>
-                    <h3 class="fw-bold mb-0 text-success" th:text="${report.hiredCount}">0</h3>
-                </div>
-            </div>
+    <div class="card border-0 shadow-sm" th:if="${report == null}">
+        <div class="card-body p-5 text-center">
+            <i class="bi bi-briefcase fs-1 text-muted"></i>
+            <h5 class="fw-bold text-dark mt-3">No job postings found.</h5>
+            <p class="text-muted mb-0">Create a job posting before viewing pipeline reports.</p>
         </div>
     </div>
 
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 fw-bold text-dark">
-                        <i class="bi bi-bar-chart text-primary me-1"></i> Pipeline
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Applied</span>
-                        <strong th:text="${report.appliedCount}">0</strong>
+    <div th:if="${report != null}">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-briefcase text-primary me-1"></i> Job Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="text-muted small">Job title</div>
+                        <div class="fw-semibold" th:text="${report.jobTitle}">Java Developer</div>
                     </div>
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Screening</span>
-                        <strong th:text="${report.screeningCount}">0</strong>
+                    <div class="col-md-4">
+                        <div class="text-muted small">Department</div>
+                        <div class="fw-semibold" th:text="${report.department}">Engineering</div>
                     </div>
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Interview</span>
-                        <strong th:text="${report.interviewCount}">0</strong>
+                    <div class="col-md-4">
+                        <div class="text-muted small">Recruiter</div>
+                        <div class="fw-semibold" th:text="${report.recruiterName}">Recruiter</div>
                     </div>
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Offered</span>
-                        <strong th:text="${report.offeredCount}">0</strong>
+                    <div class="col-md-4">
+                        <div class="text-muted small">Job status</div>
+                        <span class="badge"
+                              th:classappend="${report.jobStatus == 'ACTIVE'} ? ' bg-success' :
+                                (${report.jobStatus == 'CLOSED'} ? ' bg-danger' : ' bg-secondary')"
+                              th:text="${report.jobStatus}">ACTIVE</span>
                     </div>
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Hired</span>
-                        <strong th:text="${report.hiredCount}">0</strong>
+                    <div class="col-md-4">
+                        <div class="text-muted small">Posted date</div>
+                        <div class="fw-semibold"
+                             th:text="${report.postedDate != null ? #temporals.format(report.postedDate, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">
+                            -
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Rejected</span>
-                        <strong th:text="${report.rejectedCount}">0</strong>
-                    </div>
-                    <div class="d-flex justify-content-between py-2">
-                        <span>Withdrawn</span>
-                        <strong th:text="${report.withdrawnCount}">0</strong>
+                    <div class="col-md-4">
+                        <div class="text-muted small">Application deadline</div>
+                        <div class="fw-semibold"
+                             th:text="${report.applicationDeadline != null ? report.applicationDeadline : '-'}">
+                            -
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 fw-bold text-dark">
-                        <i class="bi bi-percent text-success me-1"></i> Conversion Rate
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Applied to Screening</span>
-                        <strong th:text="${report.screeningRate} + '%'">0%</strong>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-bar-chart text-primary me-1"></i> Pipeline Stage Breakdown
+                </h5>
+            </div>
+            <div class="card-body" th:if="${report.totalApplications > 0}">
+                <div class="mb-3" th:each="stage : ${report.stageRows}">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="fw-semibold" th:text="${stage.name}">Applied</span>
+                        <span class="text-muted" th:text="${stage.count}">0</span>
                     </div>
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Screening to Interview</span>
-                        <strong th:text="${report.interviewRate} + '%'">0%</strong>
-                    </div>
-                    <div class="d-flex justify-content-between border-bottom py-2">
-                        <span>Interview to Offered</span>
-                        <strong th:text="${report.offerRate} + '%'">0%</strong>
-                    </div>
-                    <div class="d-flex justify-content-between py-2">
-                        <span>Offered to Hired</span>
-                        <strong th:text="${report.hiringRate} + '%'">0%</strong>
+                    <div class="progress" style="height: 18px;">
+                        <div class="progress-bar"
+                             role="progressbar"
+                             th:style="'width: ' + ${stage.percent} + '%'"
+                             th:aria-valuenow="${stage.percent}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="card-body p-5 text-center" th:if="${report.totalApplications == 0}">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <h5 class="fw-bold text-dark mt-3">No applications have been received for this job posting yet.</h5>
+            </div>
         </div>
-    </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-0 py-3">
-            <h5 class="mb-0 fw-bold text-dark">
-                <i class="bi bi-people text-primary me-1"></i> Applications
-            </h5>
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-people text-primary me-1"></i> Candidate Table
+                </h5>
+            </div>
+            <div class="table-responsive" th:if="${!report.applicationPage.isEmpty()}">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Candidate full name</th>
+                        <th>Current stage</th>
+                        <th>Days in stage</th>
+                        <th class="pe-3">Assigned interviewer</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="app : ${report.applicationPage.content}">
+                        <td class="ps-3 fw-semibold" th:text="${app.candidateName}">Nguyễn Văn A</td>
+                        <td>
+                            <span class="badge bg-primary" th:text="${app.status}">INTERVIEW</span>
+                        </td>
+                        <td th:text="${app.daysInStage}">0</td>
+                        <td class="pe-3" th:text="${app.assignedInterviewer}">-</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-5 text-center" th:if="${report.applicationPage.isEmpty()}">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <h5 class="fw-bold text-dark mt-3">No applications have been received for this job posting yet.</h5>
+            </div>
         </div>
-        <div class="table-responsive" th:if="${!report.applicationPage.isEmpty()}">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                <tr>
-                    <th class="ps-3">Candidate</th>
-                    <th>Status</th>
-                    <th>Applied Date</th>
-                    <th class="pe-3">Last Updated</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="app : ${report.applicationPage.content}">
-                    <td class="ps-3 fw-semibold" th:text="${app.candidateName}">Nguyễn Văn A</td>
-                    <td>
-                        <span class="badge bg-primary" th:text="${app.status}">INTERVIEW</span>
-                    </td>
-                    <td class="text-secondary small"
-                        th:text="${app.appliedDate != null ? #temporals.format(app.appliedDate, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">
-                        -
-                    </td>
-                    <td class="pe-3 text-secondary small"
-                        th:text="${app.lastUpdated != null ? #temporals.format(app.lastUpdated, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh') : '-'}">
-                        -
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="p-5 text-center" th:if="${report.applicationPage.isEmpty()}">
-            <i class="bi bi-inbox fs-1 text-muted"></i>
-            <h5 class="fw-bold text-dark mt-3">No applications found.</h5>
-        </div>
-    </div>
 
-    <div class="d-flex justify-content-between align-items-center mt-4" th:if="${report.applicationPage.totalPages > 1}">
-        <div class="text-muted small">
-            Showing Page <span class="fw-bold" th:text="${report.applicationPage.number + 1}">1</span>
-            of <span class="fw-bold" th:text="${report.applicationPage.totalPages}">1</span>
+        <div class="d-flex justify-content-between align-items-center mt-4"
+             th:if="${report.applicationPage.totalPages > 1}">
+            <div class="text-muted small">
+                Showing Page <span class="fw-bold" th:text="${report.applicationPage.number + 1}">1</span>
+                of <span class="fw-bold" th:text="${report.applicationPage.totalPages}">1</span>
+            </div>
+            <nav aria-label="Pipeline report pagination">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item" th:classappend="${report.applicationPage.first} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="${showJobSelector}
+                            ? @{/hr/reports(jobId=${report.jobId}, page=${report.applicationPage.number - 1})}
+                            : @{/hr/jobs/{jobId}/pipeline-report(jobId=${report.jobId}, page=${report.applicationPage.number - 1})}">
+                            &laquo; Previous
+                        </a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, report.applicationPage.totalPages - 1)}"
+                        th:classappend="${report.applicationPage.number == i} ? 'active'">
+                        <a class="page-link"
+                           th:href="${showJobSelector}
+                            ? @{/hr/reports(jobId=${report.jobId}, page=${i})}
+                            : @{/hr/jobs/{jobId}/pipeline-report(jobId=${report.jobId}, page=${i})}"
+                           th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${report.applicationPage.last} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="${showJobSelector}
+                            ? @{/hr/reports(jobId=${report.jobId}, page=${report.applicationPage.number + 1})}
+                            : @{/hr/jobs/{jobId}/pipeline-report(jobId=${report.jobId}, page=${report.applicationPage.number + 1})}">
+                            Next &raquo;
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
-        <nav aria-label="Pipeline report pagination">
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item" th:classappend="${report.applicationPage.first} ? 'disabled'">
-                    <a class="page-link"
-                       th:href="@{/hr/jobs/{jobId}/pipeline-report(jobId=${report.jobId}, page=${report.applicationPage.number - 1})}">
-                        &laquo; Previous
-                    </a>
-                </li>
-                <li class="page-item"
-                    th:each="i : ${#numbers.sequence(0, report.applicationPage.totalPages - 1)}"
-                    th:classappend="${report.applicationPage.number == i} ? 'active'">
-                    <a class="page-link"
-                       th:href="@{/hr/jobs/{jobId}/pipeline-report(jobId=${report.jobId}, page=${i})}"
-                       th:text="${i + 1}">1</a>
-                </li>
-                <li class="page-item" th:classappend="${report.applicationPage.last} ? 'disabled'">
-                    <a class="page-link"
-                       th:href="@{/hr/jobs/{jobId}/pipeline-report(jobId=${report.jobId}, page=${report.applicationPage.number + 1})}">
-                        Next &raquo;
-                    </a>
-                </li>
-            </ul>
-        </nav>
     </div>
 
 </main>

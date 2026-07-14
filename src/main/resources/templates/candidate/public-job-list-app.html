@@ -1,0 +1,143 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, 'View Jobs', 'candidate-jobs')}">
+<body>
+<main th:fragment="main-content">
+
+    <div class="list-header">
+        <div>
+            <h2 class="mb-1 fw-bold text-dark">Find Your Next Role</h2>
+            <p class="subtitle">Browse active job postings and apply with your CV.</p>
+        </div>
+        <div class="text-end">
+            <div class="text-muted small">Active results</div>
+            <div class="fw-bold fs-4 text-dark" th:text="${jobPage.totalElements}">0</div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm search-form-container">
+        <form th:action="@{/jobs}" method="get" class="row g-3 align-items-end">
+            <div class="col-lg-5">
+                <label for="keyword" class="form-label">Keyword</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input id="keyword"
+                           type="text"
+                           name="keyword"
+                           class="form-control"
+                           placeholder="Search by job title"
+                           th:value="${keyword}">
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <label for="department" class="form-label">Department</label>
+                <input id="department"
+                       type="text"
+                       name="department"
+                       class="form-control"
+                       placeholder="Engineering"
+                       th:value="${department}">
+            </div>
+            <div class="col-lg-3">
+                <label for="location" class="form-label">Location</label>
+                <input id="location"
+                       type="text"
+                       name="location"
+                       class="form-control"
+                       placeholder="Hanoi"
+                       th:value="${location}">
+            </div>
+            <div class="col-lg-1 d-grid">
+                <button type="submit" class="btn btn-primary" title="Search">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            <div class="col-12" th:if="${keyword != null || department != null || location != null}">
+                <a th:href="@{/jobs}" class="btn btn-secondary btn-sm">
+                    <i class="bi bi-x-circle me-1"></i> Reset filters
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div th:if="${jobPage.isEmpty()}" class="p-5 text-center bg-white rounded shadow-sm border">
+        <i class="bi bi-briefcase fs-1 text-muted"></i>
+        <h5 class="fw-bold text-dark mt-3">No active jobs found.</h5>
+        <p class="text-muted mb-4">Try changing the keyword, department, or location filters.</p>
+        <a th:href="@{/jobs}" class="btn btn-primary">View all jobs</a>
+    </div>
+
+    <div class="grid" th:if="${!jobPage.isEmpty()}">
+        <article class="card border-0 shadow-sm h-100 mb-0" th:each="job : ${jobPage.content}">
+            <div class="mb-3">
+                <div>
+                    <h3 class="h5 mb-2" th:text="${job.title}">Java Developer</h3>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="job-type-badge" th:text="${job.department}">Engineering</span>
+                        <span class="salary-badge" th:text="${job.salaryRange != null && !#strings.isEmpty(job.salaryRange) ? job.salaryRange : 'Negotiable'}">
+                            Negotiable
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-grid mb-3" style="grid-template-columns: 1fr; gap: .75rem;">
+                <div class="detail-item">
+                    <div class="detail-label"><i class="bi bi-geo-alt me-1"></i> Location</div>
+                    <div class="detail-value" th:text="${job.location}">Hanoi</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label"><i class="bi bi-calendar-event me-1"></i> Deadline</div>
+                    <div class="detail-value"
+                         th:text="${job.applicationDeadline != null ? #temporals.format(job.applicationDeadline, 'dd/MM/yyyy') : 'Open'}">
+                        Open
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-muted mb-4"
+               style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;"
+               th:text="${job.description}">
+                Job description preview
+            </p>
+
+            <div class="mt-auto">
+                <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-primary w-100">
+                    <i class="bi bi-eye me-1"></i> View Details
+                </a>
+            </div>
+        </article>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4" th:if="${jobPage.totalPages > 1}">
+        <div class="text-muted small">
+            Page <span class="fw-bold" th:text="${jobPage.number + 1}">1</span>
+            of <span class="fw-bold" th:text="${jobPage.totalPages}">1</span>
+        </div>
+        <nav aria-label="Job pagination">
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${!jobPage.hasPrevious()} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/jobs(page=${jobPage.number - 1}, keyword=${keyword}, department=${department}, location=${location})}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, jobPage.totalPages - 1)}"
+                    th:classappend="${jobPage.number == i} ? 'active'">
+                    <a class="page-link"
+                       th:href="@{/jobs(page=${i}, keyword=${keyword}, department=${department}, location=${location})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${!jobPage.hasNext()} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/jobs(page=${jobPage.number + 1}, keyword=${keyword}, department=${department}, location=${location})}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</main>
+</body>
+</html>

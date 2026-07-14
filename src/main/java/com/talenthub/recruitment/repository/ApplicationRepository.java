@@ -124,6 +124,9 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     @Query(value = "SELECT COUNT(a.id) FROM applications a JOIN job_postings j ON j.id = a.job_id WHERE CAST(a.status AS TEXT) = 'APPLIED' AND (:hrManagerId IS NULL OR j.created_by_id = :hrManagerId)", nativeQuery = true)
     long countAwaitingReviewForHrOrAdmin(@Param("hrManagerId") Long hrManagerId);
 
+    @Query(value = "SELECT COUNT(a.id) FROM applications a JOIN job_postings j ON j.id = a.job_id WHERE CAST(a.status AS TEXT) = 'APPLIED'", nativeQuery = true)
+    long countAllAwaitingReview();
+
     @Query(value = "SELECT COUNT(*) FROM applications WHERE job_id = :jobId", nativeQuery = true)
     long countByJobId(@Param("jobId") Long jobId);
 
