@@ -33,10 +33,48 @@
         </div>
     </div>
 
-    <!-- Evaluation Form -->
+    <!-- Evaluation Form / Read-only View -->
     <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-            <form th:action="@{/interviewer/interviews/{interviewId}/evaluate(interviewId=${interview.id})}" method="post" id="evaluationForm">
+            
+            <!-- READ-ONLY VIEW (If already evaluated) -->
+            <div th:if="${interview.status.name() == 'EVALUATED'}">
+                <!-- Notice of Submission -->
+                <div class="alert alert-info border-0 d-flex align-items-center mb-4">
+                    <i class="bi bi-check-circle-fill fs-5 me-3 text-info"></i>
+                    <div>
+                        <span th:text="'You submitted this evaluation on ' + ${#temporals.format(interview.evaluatedAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh')} + '.'">You submitted this evaluation on 11/07/2026 14:00.</span>
+                    </div>
+                </div>
+
+                <!-- Rating Stars (Read-only) -->
+                <div class="mb-4">
+                    <span class="d-block fw-bold text-dark mb-2">Đánh giá chung:</span>
+                    <div class="star-rating d-flex gap-2 align-items-center">
+                        <span th:each="star : ${#numbers.sequence(1, 5)}">
+                            <i class="bi" th:classappend="${star <= interview.rating} ? 'bi-star-fill text-warning' : 'bi-star text-muted'"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Written Feedback (Read-only) -->
+                <div class="mb-4">
+                    <span class="d-block fw-bold text-dark mb-2">Nhận xét chi tiết:</span>
+                    <div class="p-3 bg-light rounded border text-dark" style="white-space: pre-wrap;" th:text="${interview.feedback}">
+                        Nhận xét chi tiết...
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div>
+                    <a th:href="@{/interviewer/applications/{id}(id=${app.id})}" class="btn btn-outline-secondary px-4 py-2">
+                        <i class="bi bi-arrow-left me-1"></i> Quay lại chi tiết hồ sơ
+                    </a>
+                </div>
+            </div>
+
+            <!-- FORM FOR SUBMITTING (If not evaluated yet) -->
+            <form th:unless="${interview.status.name() == 'EVALUATED'}" th:action="@{/interviewer/interviews/{interviewId}/evaluate(interviewId=${interview.id})}" method="post" id="evaluationForm">
                 
                 <!-- Rating Stars -->
                 <div class="mb-4">

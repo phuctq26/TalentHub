@@ -465,10 +465,7 @@ public class HrApplicationController {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Access denied");
         }
 
-        // Nếu cuộc phỏng vấn đã được đánh giá rồi, chuyển hướng về chi tiết ứng viên
-        if (interview.getStatus() == InterviewStatus.EVALUATED) {
-            return "redirect:/interviewer/applications/" + interview.getApplication().getId();
-        }
+
 
         model.addAttribute("interview", interview);
         model.addAttribute("app", interview.getApplication());
@@ -540,7 +537,7 @@ public class HrApplicationController {
         log.setDescription("Đã nộp đánh giá phỏng vấn #" + interviewId + " - Điểm: " + rating);
         auditLogRepository.save(log);
 
-        redirectAttributes.addFlashAttribute("successMessage", "Đã nộp đánh giá phỏng vấn thành công.");
+        redirectAttributes.addFlashAttribute("successMessage", "Evaluation submitted. Thank you.");
         return "redirect:/interviewer/applications/" + interview.getApplication().getId();
     }
 
