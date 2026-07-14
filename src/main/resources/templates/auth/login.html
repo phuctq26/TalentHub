@@ -26,6 +26,12 @@
                     <div th:if="${lockoutError}" class="alert alert-danger" role="alert">
                         Tài khoản bị khóa tạm thời do đăng nhập sai quá nhiều lần. Vui lòng thử lại sau 10 phút.
                     </div>
+                    <div th:if="${permanentLockError}" class="alert alert-danger" role="alert">
+                        Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để mở khóa.
+                    </div>
+                    <div th:if="${inactiveError}" class="alert alert-danger" role="alert">
+                        Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.
+                    </div>
                     <div th:if="${genericError}" class="alert alert-danger" role="alert">
                         Tên đăng nhập hoặc mật khẩu không đúng.
                     </div>
