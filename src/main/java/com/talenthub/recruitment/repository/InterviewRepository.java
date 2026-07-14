@@ -11,9 +11,15 @@ import java.util.Optional;
 
 @Repository
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
-
     Optional<Interview> findFirstByApplication_IdOrderByScheduledAtAsc(Long applicationId);
 
+    @Query("SELECT i FROM Interview i " +
+           "JOIN FETCH i.application a " +
+           "JOIN FETCH a.candidate c " +
+           "JOIN FETCH a.job j " +
+           "JOIN FETCH i.interviewer u " +
+           "WHERE i.id = :id")
+    Optional<Interview> findByIdWithRelations(@Param("id") Long id);
     List<Interview> findByApplication_IdOrderByScheduledAtDesc(Long applicationId);
 
     @Query(value = """

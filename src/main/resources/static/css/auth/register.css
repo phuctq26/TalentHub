@@ -1,0 +1,97 @@
+/* ==========================================================================
+   Register Page Stylesheet — TalentHub
+   ========================================================================== */
+
+/* Design Tokens & Overrides */
+:root {
+    --primary-color: #1e293b;
+    --accent-color: #0f766e;
+    --accent-hover: #115e59;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: #f8fafc;
+    color: #0f172a;
+}
+
+/* Register layout container */
+.register-container {
+    max-width: 500px;
+    margin: 50px auto;
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
+}
+
+/* Header */
+.register-container h1 {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-size: 1.75rem;
+}
+
+/* Label styling */
+.register-container .form-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* Custom Input Focus with Accent Colors */
+.register-container .form-control:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+/* Bootstrap Button override to use Accent Color */
+.register-container .btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    font-weight: 600;
+    padding: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.register-container .btn-primary:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.register-container .btn-primary:disabled {
+    background-color: #cbd5e1;
+    border-color: #cbd5e1;
+}
+
+/* Alert styles */
+.register-container .alert {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.register-container .alert-danger {
+    background-color: #fef2f2;
+    border-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Custom helper text */
+.form-text {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* Link override */
+.register-container a {
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.register-container a:hover {
+    color: var(--accent-hover);
+    text-decoration: underline !important;
+}

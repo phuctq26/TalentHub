@@ -27,6 +27,12 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,49 +72,33 @@ public class HrApplicationController {
         // Lấy thông tin người dùng đang đăng nhập từ Session
         User currentUser = (User) session.getAttribute("currentUser");
         String currentRole = (String) session.getAttribute("currentRole");
-        
-        // Nếu là HR_MANAGER, chỉ lấy các công việc do chính HR đó tạo ra. Nếu là ADMIN, được xem tất cả.
+
+        // Nếu là HR_MANAGER, chỉ lấy các công việc do chính HR đó tạo ra. Nếu là ADMIN,
+        // được xem tất cả.
         Long hrManagerId = null;
         if ("HR_MANAGER".equalsIgnoreCase(currentRole)) {
             hrManagerId = currentUser.getId();
         }
 
-        // Lấy danh sách công việc tương ứng để hiển thị trong ô lựa chọn bộ lọc (Dropdown filter)
+        // Lấy danh sách công việc tương ứng để hiển thị trong ô lựa chọn bộ lọc
+        // (Dropdown filter)
         List<JobPosting> jobsForFilter = jobPostingService.search(hrManagerId, null, null, null);
 
-        // Lấy danh sách hồ sơ ứng tuyển đã được lọc theo công việc, trạng thái và phân trang
-        Page<Application> applicationPage = applicationService.getApplications(jobId, status, page, PAGE_SIZE, hrManagerId);
+        // Lấy danh sách hồ sơ ứng tuyển đã được lọc theo công việc, trạng thái và phân
+        // trang
+        Page<Application> applicationPage = applicationService.getApplications(jobId, status, page, PAGE_SIZE,
+                hrManagerId);
 
-        // Lấy toàn bộ danh sách hồ sơ (không phân trang) để đếm số lượng cho từng tab bộ lọc
-        List<Application> allAppsInScope = applicationService.getApplications(jobId, null, 0, Integer.MAX_VALUE, hrManagerId).getContent();
-        
-        // Đếm số lượng ứng viên theo từng trạng thái bằng vòng lặp for đơn giản, dễ hiểu
-        long allCount = allAppsInScope.size();
-        long appliedCount = 0;
-        long screeningCount = 0;
-        long interviewCount = 0;
-        long offerCount = 0;
-        long hiredCount = 0;
-        long rejectedCount = 0;
-        long withdrawnCount = 0;
-
-        for (Application app : allAppsInScope) {
-            if (app.getStatus() == ApplicationStatus.APPLIED) {
-                appliedCount++;
-            } else if (app.getStatus() == ApplicationStatus.SCREENING) {
-                screeningCount++;
-            } else if (app.getStatus() == ApplicationStatus.INTERVIEW) {
-                interviewCount++;
-            } else if (app.getStatus() == ApplicationStatus.OFFER) {
-                offerCount++;
-            } else if (app.getStatus() == ApplicationStatus.HIRED) {
-                hiredCount++;
-            } else if (app.getStatus() == ApplicationStatus.REJECTED) {
-                rejectedCount++;
-            } else if (app.getStatus() == ApplicationStatus.WITHDRAWN) {
-                withdrawnCount++;
-            }
-        }
+        // Đếm số lượng hồ sơ cho từng tab bằng query count riêng, tránh load toàn bộ
+        // entity vào bộ nhớ (sẽ gây LazyInitializationException khi dùng JOIN FETCH)
+        long allCount = applicationService.countApplications(jobId, null, hrManagerId);
+        long appliedCount = applicationService.countApplications(jobId, "APPLIED", hrManagerId);
+        long screeningCount = applicationService.countApplications(jobId, "SCREENING", hrManagerId);
+        long interviewCount = applicationService.countApplications(jobId, "INTERVIEW", hrManagerId);
+        long offerCount = applicationService.countApplications(jobId, "OFFER", hrManagerId);
+        long hiredCount = applicationService.countApplications(jobId, "HIRED", hrManagerId);
+        long rejectedCount = applicationService.countApplications(jobId, "REJECTED", hrManagerId);
+        long withdrawnCount = applicationService.countApplications(jobId, "WITHDRAWN", hrManagerId);
 
         // Đưa các thuộc tính vào Model để hiển thị ngoài giao diện Thymeleaf
         model.addAttribute("applicationPage", applicationPage);
@@ -147,7 +137,8 @@ public class HrApplicationController {
             @RequestParam(defaultValue = "0") int page,
             HttpSession session,
             Model model) {
-        // Tái sử dụng lại phương thức listAllApplications bằng cách truyền trực tiếp jobId vào
+        // Tái sử dụng lại phương thức listAllApplications bằng cách truyền trực tiếp
+        // jobId vào
         return listAllApplications(jobId, status, page, session, model);
     }
 
@@ -163,7 +154,7 @@ public class HrApplicationController {
         // Lấy thông tin người dùng đang đăng nhập từ Session
         User currentUser = (User) session.getAttribute("currentUser");
         String currentRole = (String) session.getAttribute("currentRole");
-        
+
         Long hrManagerId = null;
         if ("HR_MANAGER".equalsIgnoreCase(currentRole)) {
             hrManagerId = currentUser.getId();
@@ -172,10 +163,12 @@ public class HrApplicationController {
         // Tìm thông tin hồ sơ ứng tuyển theo ID
         Application application = applicationService.getApplicationById(id);
 
-        // Kiểm tra bảo mật: Nếu là HR Manager, chỉ cho phép xem hồ sơ ứng tuyển của công việc do mình tạo ra
+        // Kiểm tra bảo mật: Nếu là HR Manager, chỉ cho phép xem hồ sơ ứng tuyển của
+        // công việc do mình tạo ra
         if (hrManagerId != null) {
-            Long creatorId = application.getJob().getCreatedBy().getId();
-            if (!creatorId.equals(hrManagerId)) {
+            User creator = application.getJob().getCreatedBy();
+            Long creatorId = (creator != null) ? creator.getId() : null;
+            if (creatorId == null || !creatorId.equals(hrManagerId)) {
                 return "redirect:/hr/applications";
             }
         }
@@ -184,7 +177,8 @@ public class HrApplicationController {
         List<ApplicationNote> notes = applicationService.getNotes(id);
         List<Interview> interviews = applicationService.getInterviews(id);
 
-        // Lọc danh sách các buổi phỏng vấn đã đánh giá (EVALUATED) bằng vòng lặp for đơn giản
+        // Lọc danh sách các buổi phỏng vấn đã đánh giá (EVALUATED) bằng vòng lặp for
+        // đơn giản
         List<Interview> evaluations = new ArrayList<>();
         for (Interview interview : interviews) {
             if (interview.getStatus() == InterviewStatus.EVALUATED) {
@@ -193,7 +187,7 @@ public class HrApplicationController {
         }
 
         // Đưa các thông tin vào Model để hiển thị ngoài giao diện Thymeleaf
-        model.addAttribute("application", application);
+        model.addAttribute("app", application);
         model.addAttribute("notes", notes);
         model.addAttribute("interviews", interviews);
         model.addAttribute("evaluations", evaluations);
@@ -205,7 +199,8 @@ public class HrApplicationController {
     }
 
     /**
-     * Hiển thị chi tiết hồ sơ ứng tuyển dành cho Interviewer được phân công (SCR-17).
+     * Hiển thị chi tiết hồ sơ ứng tuyển dành cho Interviewer được phân công
+     * (SCR-17).
      */
     @GetMapping("/interviewer/applications/{id}")
     public String viewInterviewerApplicationDetail(
@@ -215,12 +210,13 @@ public class HrApplicationController {
 
         // Lấy thông tin người dùng đang đăng nhập từ Session
         User currentUser = (User) session.getAttribute("currentUser");
-        
+
         // Tìm thông tin hồ sơ ứng tuyển theo ID
         Application application = applicationService.getApplicationById(id);
         List<Interview> interviews = applicationService.getInterviews(id);
 
-        // Kiểm tra bảo mật: Kiểm tra xem người phỏng vấn hiện tại có được phân công đánh giá hồ sơ này không
+        // Kiểm tra bảo mật: Kiểm tra xem người phỏng vấn hiện tại có được phân công
+        // đánh giá hồ sơ này không
         boolean isAssigned = false;
         for (Interview i : interviews) {
             if (i.getInterviewer().getId().equals(currentUser.getId())) {
@@ -253,7 +249,7 @@ public class HrApplicationController {
         }
 
         // Đưa các thông tin vào Model để hiển thị ngoài giao diện Thymeleaf
-        model.addAttribute("application", application);
+        model.addAttribute("app", application);
         model.addAttribute("interviews", interviews);
         model.addAttribute("scheduledInterview", scheduledInterview);
         model.addAttribute("evaluatedInterview", evaluatedInterview);
@@ -265,7 +261,8 @@ public class HrApplicationController {
     }
 
     /**
-     * Xử lý chuyển đổi trạng thái (Advance/Reject) cho hồ sơ ứng tuyển của HR Manager / Admin (SCR-17).
+     * Xử lý chuyển đổi trạng thái (Advance/Reject) cho hồ sơ ứng tuyển của HR
+     * Manager / Admin (SCR-17).
      */
     @PostMapping("/hr/applications/{id}/status")
     public String changeApplicationStatus(
@@ -277,7 +274,7 @@ public class HrApplicationController {
         // Lấy thông tin người dùng đang đăng nhập từ Session
         User currentUser = (User) session.getAttribute("currentUser");
         String currentRole = (String) session.getAttribute("currentRole");
-        
+
         Long hrManagerId = null;
         if ("HR_MANAGER".equalsIgnoreCase(currentRole)) {
             hrManagerId = currentUser.getId();
@@ -285,10 +282,12 @@ public class HrApplicationController {
 
         Application application = applicationService.getApplicationById(id);
 
-        // Kiểm tra bảo mật: Nếu là HR Manager, chỉ cho phép thao tác trên hồ sơ của công việc mình tạo ra
+        // Kiểm tra bảo mật: Nếu là HR Manager, chỉ cho phép thao tác trên hồ sơ của
+        // công việc mình tạo ra
         if (hrManagerId != null) {
-            Long creatorId = application.getJob().getCreatedBy().getId();
-            if (!creatorId.equals(hrManagerId)) {
+            User creator = application.getJob().getCreatedBy();
+            Long creatorId = (creator != null) ? creator.getId() : null;
+            if (creatorId == null || !creatorId.equals(hrManagerId)) {
                 return "redirect:/hr/applications";
             }
         }
@@ -314,46 +313,6 @@ public class HrApplicationController {
     }
 
     /**
-     * Thêm ghi chú nội bộ mới cho hồ sơ ứng tuyển (SCR-17).
-     */
-    @PostMapping("/hr/applications/{id}/note")
-    public String addNote(
-            @PathVariable Long id,
-            @RequestParam("noteContent") String noteContent,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-
-        // Lấy thông tin người dùng đang đăng nhập từ Session
-        User currentUser = (User) session.getAttribute("currentUser");
-        String currentRole = (String) session.getAttribute("currentRole");
-        
-        Long hrManagerId = null;
-        if ("HR_MANAGER".equalsIgnoreCase(currentRole)) {
-            hrManagerId = currentUser.getId();
-        }
-
-        Application application = applicationService.getApplicationById(id);
-
-        // Kiểm tra bảo mật: Nếu là HR Manager, chỉ cho phép thêm ghi chú cho hồ sơ thuộc công việc của mình
-        if (hrManagerId != null) {
-            Long creatorId = application.getJob().getCreatedBy().getId();
-            if (!creatorId.equals(hrManagerId)) {
-                return "redirect:/hr/applications";
-            }
-        }
-
-        try {
-            // Thêm ghi chú nội bộ mới
-            applicationService.addNote(id, currentUser, noteContent);
-            redirectAttributes.addFlashAttribute("successMessage", "Thêm ghi chú nội bộ thành công.");
-        } catch (Exception ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể thêm ghi chú: " + ex.getMessage());
-        }
-
-        return "redirect:/hr/applications/" + id;
-    }
-
-    /**
      * Tải xuống tệp hồ sơ CV tuyển dụng dành cho HR Manager / Admin (SCR-17).
      */
     @GetMapping("/hr/applications/{id}/cv")
@@ -365,7 +324,8 @@ public class HrApplicationController {
         User currentUser = (User) session.getAttribute("currentUser");
         String currentRole = (String) session.getAttribute("currentRole");
 
-        // Lấy tệp CV trên máy chủ, hệ thống sẽ kiểm tra quyền truy cập ở tầng dịch vụ (Service layer)
+        // Lấy tệp CV trên máy chủ, hệ thống sẽ kiểm tra quyền truy cập ở tầng dịch vụ
+        // (Service layer)
         CandidateCvFile cvFile = applicationService.getCvForHrOrInterviewer(id, currentUser.getId(), currentRole);
 
         // Ghi audit log
@@ -384,8 +344,7 @@ public class HrApplicationController {
                         ContentDisposition.inline()
                                 .filename(cvFile.fileName(), StandardCharsets.UTF_8)
                                 .build()
-                                .toString()
-                )
+                                .toString())
                 .body(cvFile.resource());
     }
 
@@ -396,7 +355,8 @@ public class HrApplicationController {
     public ResponseEntity<Resource> downloadCvForInterviewer(
             @PathVariable Long id,
             HttpSession session) {
-        // Tái sử dụng lại phương thức downloadCvForHr để tận dụng phân quyền kiểm tra bên trong
+        // Tái sử dụng lại phương thức downloadCvForHr để tận dụng phân quyền kiểm tra
+        // bên trong
         return downloadCvForHr(id, session);
     }
 
@@ -410,8 +370,9 @@ public class HrApplicationController {
 
         // Lấy danh sách lịch phỏng vấn được giao cho Interviewer hiện tại
         List<Interview> interviews = applicationService.getInterviewerInterviews(currentUser.getId());
-        
-        // Lấy danh sách hồ sơ ứng tuyển từ các cuộc phỏng vấn được giao bằng vòng lặp for đơn giản, tránh trùng lặp
+
+        // Lấy danh sách hồ sơ ứng tuyển từ các cuộc phỏng vấn được giao bằng vòng lặp
+        // for đơn giản, tránh trùng lặp
         List<Application> applications = new ArrayList<>();
         for (Interview interview : interviews) {
             Application app = interview.getApplication();
@@ -429,35 +390,90 @@ public class HrApplicationController {
     }
 
     /**
+     * Hiển thị giao diện nộp đánh giá phỏng vấn (SCR-19).
+     */
+    @GetMapping("/interviewer/interviews/{interviewId}/evaluate")
+    public String showEvaluationForm(
+            @PathVariable Long interviewId,
+            HttpSession session,
+            Model model) {
+
+        User currentUser = (User) session.getAttribute("currentUser");
+
+        // Tìm cuộc phỏng vấn
+        Interview interview = interviewRepository.findByIdWithRelations(interviewId)
+                .orElseThrow(() -> new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,
+                        "Không tìm thấy lịch phỏng vấn"));
+
+        // Bảo mật: Chỉ cho phép người phỏng vấn được phân công
+        if (!interview.getInterviewer().getId().equals(currentUser.getId())) {
+            throw new ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Access denied");
+        }
+
+        // Nếu cuộc phỏng vấn đã được đánh giá rồi, chuyển hướng về chi tiết ứng viên
+        if (interview.getStatus() == InterviewStatus.EVALUATED) {
+            return "redirect:/interviewer/applications/" + interview.getApplication().getId();
+        }
+
+        model.addAttribute("interview", interview);
+        model.addAttribute("app", interview.getApplication());
+        model.addAttribute("title", "Đánh giá phỏng vấn");
+        model.addAttribute("activeTab", "interviewer-apps");
+
+        return "interviewer/evaluate";
+    }
+
+    /**
      * Nhận kết quả đánh giá phỏng vấn từ người phỏng vấn (SCR-19/SCR-17).
      */
     @PostMapping("/interviewer/interviews/{interviewId}/evaluate")
     public String submitEvaluation(
             @PathVariable Long interviewId,
-            @RequestParam("rating") Short rating,
-            @RequestParam("feedback") String feedback,
+            @RequestParam(value = "rating", required = false) Short rating,
+            @RequestParam(value = "feedback", required = false) String feedback,
             HttpSession session,
+            Model model,
             RedirectAttributes redirectAttributes) {
 
-        // Lấy thông tin người dùng đang đăng nhập từ Session
         User currentUser = (User) session.getAttribute("currentUser");
-        
-        // Tìm thông tin cuộc phỏng vấn theo ID
-        Interview interview = interviewRepository.findById(interviewId)
-                .orElseThrow(() -> new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Không tìm thấy lịch phỏng vấn"));
 
-        // Kiểm tra bảo mật: Chỉ cho phép người phỏng vấn được phân công thực hiện đánh giá
+        Interview interview = interviewRepository.findByIdWithRelations(interviewId)
+                .orElseThrow(() -> new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,
+                        "Không tìm thấy lịch phỏng vấn"));
+
         if (!interview.getInterviewer().getId().equals(currentUser.getId())) {
             throw new ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Access denied");
         }
 
-        // Cập nhật kết quả đánh giá, nhận xét chi tiết và đổi trạng thái cuộc phỏng vấn thành EVALUATED
+        if (interview.getStatus() == InterviewStatus.EVALUATED) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cuộc phỏng vấn này đã được đánh giá trước đó.");
+            return "redirect:/interviewer/applications/" + interview.getApplication().getId();
+        }
+
+        boolean hasError = false;
+        if (rating == null || rating < 1 || rating > 5) {
+            model.addAttribute("ratingError", "Vui lòng chọn mức điểm đánh giá (1-5 sao).");
+            hasError = true;
+        }
+        if (feedback == null || feedback.trim().isEmpty()) {
+            model.addAttribute("feedbackError", "Vui lòng nhập nhận xét chi tiết.");
+            hasError = true;
+        }
+
+        if (hasError) {
+            model.addAttribute("interview", interview);
+            model.addAttribute("app", interview.getApplication());
+            model.addAttribute("feedback", feedback);
+            model.addAttribute("title", "Đánh giá phỏng vấn");
+            model.addAttribute("activeTab", "interviewer-apps");
+            return "interviewer/evaluate";
+        }
+
         interview.setRating(rating);
-        interview.setFeedback(feedback);
+        interview.setFeedback(feedback.trim());
         interview.setStatus(InterviewStatus.EVALUATED);
         interview.setEvaluatedAt(java.time.Instant.now());
-        
-        // Lưu cập nhật vào cơ sở dữ liệu
+
         interviewRepository.save(interview);
 
         // Ghi audit log
@@ -471,6 +487,147 @@ public class HrApplicationController {
 
         redirectAttributes.addFlashAttribute("successMessage", "Đã nộp đánh giá phỏng vấn thành công.");
         return "redirect:/interviewer/applications/" + interview.getApplication().getId();
+    }
+
+    /**
+     * Hiển thị giao diện phân công phỏng vấn (SCR-18).
+     */
+    @GetMapping("/hr/applications/{id}/assign-interview")
+    public String showAssignInterviewForm(
+            @PathVariable Long id,
+            HttpSession session,
+            Model model) {
+
+        User currentUser = (User) session.getAttribute("currentUser");
+        String currentRole = (String) session.getAttribute("currentRole");
+
+        Long hrManagerId = null;
+        if ("HR_MANAGER".equalsIgnoreCase(currentRole)) {
+            hrManagerId = currentUser.getId();
+        }
+
+        Application application = applicationService.getApplicationById(id);
+
+        // Security check
+        if (hrManagerId != null) {
+            User creator = application.getJob().getCreatedBy();
+            Long creatorId = (creator != null) ? creator.getId() : null;
+            if (creatorId == null || !creatorId.equals(hrManagerId)) {
+                throw new ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Access denied");
+            }
+        }
+
+        List<User> interviewers = applicationService.getActiveInterviewers();
+
+        model.addAttribute("app", application);
+        model.addAttribute("interviewers", interviewers);
+        model.addAttribute("title", "Lên lịch phỏng vấn");
+        model.addAttribute("activeTab", "applications");
+
+        return "hr/assign-interview";
+    }
+
+    /**
+     * Xử lý lên lịch phỏng vấn (SCR-18).
+     */
+    @PostMapping("/hr/applications/{id}/assign-interview")
+    public String processAssignInterview(
+            @PathVariable Long id,
+            @RequestParam("interviewerId") Long interviewerId,
+            @RequestParam("interviewDate") String interviewDate,
+            @RequestParam("interviewTime") String interviewTime,
+            @RequestParam(value = "locationOrMeetingLink", required = false) String locationOrMeetingLink,
+            HttpSession session,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        User currentUser = (User) session.getAttribute("currentUser");
+        String currentRole = (String) session.getAttribute("currentRole");
+
+        Long hrManagerId = null;
+        if ("HR_MANAGER".equalsIgnoreCase(currentRole)) {
+            hrManagerId = currentUser.getId();
+        }
+
+        Application application = applicationService.getApplicationById(id);
+
+        // Security check
+        if (hrManagerId != null) {
+            User creator = application.getJob().getCreatedBy();
+            Long creatorId = (creator != null) ? creator.getId() : null;
+            if (creatorId == null || !creatorId.equals(hrManagerId)) {
+                throw new ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Access denied");
+            }
+        }
+
+        List<User> interviewers = applicationService.getActiveInterviewers();
+
+        // Validation
+        boolean hasError = false;
+        if (interviewerId == null) {
+            model.addAttribute("interviewerError", "Vui lòng chọn người phỏng vấn.");
+            hasError = true;
+        }
+        if (interviewDate == null || interviewDate.isBlank()) {
+            model.addAttribute("dateError", "Vui lòng chọn ngày phỏng vấn.");
+            hasError = true;
+        }
+        if (interviewTime == null || interviewTime.isBlank()) {
+            model.addAttribute("timeError", "Vui lòng chọn giờ phỏng vấn.");
+            hasError = true;
+        }
+
+        Instant scheduledAt = null;
+        if (!hasError) {
+            try {
+                LocalDate localDate = LocalDate.parse(interviewDate);
+                LocalTime localTime = LocalTime.parse(interviewTime);
+                LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
+                ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("Asia/Ho_Chi_Minh"));
+                scheduledAt = zonedDateTime.toInstant();
+
+                if (scheduledAt.isBefore(Instant.now())) {
+                    model.addAttribute("dateError", "Interview must be scheduled for a future date and time.");
+                    hasError = true;
+                }
+            } catch (Exception ex) {
+                model.addAttribute("errorMessage", "Định dạng ngày/giờ không hợp lệ.");
+                hasError = true;
+            }
+        }
+
+        if (hasError) {
+            model.addAttribute("app", application);
+            model.addAttribute("interviewers", interviewers);
+            model.addAttribute("locationOrMeetingLink", locationOrMeetingLink);
+            model.addAttribute("title", "Lên lịch phỏng vấn");
+            model.addAttribute("activeTab", "applications");
+            return "hr/assign-interview";
+        }
+
+        try {
+            applicationService.scheduleInterview(id, interviewerId, scheduledAt, locationOrMeetingLink, currentUser);
+
+            // Get interviewer name for flash message
+            String interviewerName = "";
+            for (User u : interviewers) {
+                if (u.getId().equals(interviewerId)) {
+                    interviewerName = u.getFullName();
+                    break;
+                }
+            }
+
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Interview scheduled. " + interviewerName + " has been assigned.");
+            return "redirect:/hr/applications/" + id;
+        } catch (Exception ex) {
+            model.addAttribute("errorMessage", "Đã xảy ra lỗi: " + ex.getMessage());
+            model.addAttribute("app", application);
+            model.addAttribute("interviewers", interviewers);
+            model.addAttribute("title", "Lên lịch phỏng vấn");
+            model.addAttribute("activeTab", "applications");
+            return "hr/assign-interview";
+        }
     }
 
     /**

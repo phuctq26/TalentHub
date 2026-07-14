@@ -134,6 +134,13 @@ public class AuthController {
             return "auth/forgot-password";
         }
 
+        if (result == PasswordResetService.SendOtpResult.ACCOUNT_INACTIVE) {
+            model.addAttribute("errorMessage",
+                    "Tài khoản này đã bị vô hiệu hoá. Vui lòng liên hệ quản trị viên để được hỗ trợ.");
+            model.addAttribute("email", email);
+            return "auth/forgot-password";
+        }
+
         // OTP đã được gửi — chuyển sang trang nhập OTP
         redirectAttributes.addFlashAttribute("infoMessage",
                 "Mã OTP đã được gửi đến " + email + ". Vui lòng kiểm tra hộp thư.");
@@ -149,6 +156,12 @@ public class AuthController {
 
         if (result == PasswordResetService.SendOtpResult.EMAIL_NOT_FOUND) {
             redirectAttributes.addFlashAttribute("errorMessage", "Email này chưa được đăng ký trong hệ thống.");
+            return "redirect:/forgot-password";
+        }
+
+        if (result == PasswordResetService.SendOtpResult.ACCOUNT_INACTIVE) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Tài khoản này đã bị vô hiệu hoá. Vui lòng liên hệ quản trị viên.");
             return "redirect:/forgot-password";
         }
 
@@ -242,8 +255,9 @@ public class AuthController {
         // Hash mật khẩu mới + xóa OTP trong DB
         authService.resetPassword(email, newPassword);
 
-        // Xóa session flag
-        session.removeAttribute("resetPasswordEmail");
+        // Hủy toàn bộ session hiện tại (xóa cả currentUser nếu đang đăng nhập)
+        // để đảm bảo người dùng được chuyển về trang đăng nhập, không tự đăng nhập lại
+        session.invalidate();
 
         // Thông báo thành công và về trang đăng nhập
         redirectAttributes.addFlashAttribute("successMessage",

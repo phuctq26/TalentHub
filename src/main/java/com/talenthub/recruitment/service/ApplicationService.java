@@ -39,8 +39,7 @@ public class ApplicationService {
     private static final Set<String> ALLOWED_CV_TYPES = Set.of(
             "application/pdf",
             "application/msword",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    );
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 
     private final ApplicationRepository applicationRepository;
     private final InterviewRepository interviewRepository;
@@ -53,8 +52,7 @@ public class ApplicationService {
             InterviewRepository interviewRepository,
             PublicJobService publicJobService,
             ApplicationNoteRepository applicationNoteRepository,
-            UserRepository userRepository
-    ) {
+            UserRepository userRepository) {
         this.applicationRepository = applicationRepository;
         this.interviewRepository = interviewRepository;
         this.publicJobService = publicJobService;
@@ -82,8 +80,7 @@ public class ApplicationService {
                 cvFile.getContentType(),
                 cvFile.getSize(),
                 storagePath,
-                coverLetter
-        );
+                coverLetter);
     }
 
     @Transactional(readOnly = true)
@@ -91,8 +88,7 @@ public class ApplicationService {
             Long candidateId,
             String status,
             int page,
-            int size
-    ) {
+            int size) {
         validateCandidateId(candidateId);
 
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.max(size, 1));
@@ -103,8 +99,7 @@ public class ApplicationService {
                 : applicationRepository.findMyApplicationsByStatus(
                         candidateId,
                         applicationStatus.name(),
-                        pageable
-                );
+                        pageable);
 
         return applicationPage.map(this::toMyApplicationResponse);
     }
@@ -133,8 +128,7 @@ public class ApplicationService {
                 candidateId,
                 ApplicationStatus.WITHDRAWN.name(),
                 now,
-                now
-        );
+                now);
     }
 
     @Transactional(readOnly = true)
@@ -151,8 +145,7 @@ public class ApplicationService {
         return new CandidateCvFile(
                 new FileSystemResource(cvPath),
                 application.getCvFileName(),
-                application.getCvContentType()
-        );
+                application.getCvContentType());
     }
 
     public record CandidateCvFile(Resource resource, String fileName, String contentType) {
@@ -227,9 +220,20 @@ public class ApplicationService {
         return applicationRepository.findByJobIdAndStatus(jobId, hrManagerId, status, pageable);
     }
 
+    /**
+     * Đếm số hồ sơ theo bộ lọc mà không load entity — dùng để hiển thị số lượng
+     * trên các tab trạng thái trong trang danh sách, tránh LazyInitializationException.
+     */
+    @Transactional(readOnly = true)
+    public long countApplications(Long jobId, String status, Long hrManagerId) {
+        return applicationRepository.countByFiltersAndStatus(jobId, hrManagerId, status);
+    }
+
+
+
     @Transactional(readOnly = true)
     public Application getApplicationById(Long id) {
-        return applicationRepository.findById(id)
+        return applicationRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Không tìm thấy hồ sơ ứng tuyển"));
     }
 
@@ -270,17 +274,46 @@ public class ApplicationService {
     }
 
     @Transactional(readOnly = true)
+    public List<User> getActiveInterviewers() {
+        return userRepository.findByRoleNameAndStatus("INTERVIEWER", "ACTIVE");
+    }
+
+    @Transactional
+    public void scheduleInterview(Long applicationId, Long interviewerId, Instant scheduledAt,
+            String locationOrMeetingLink, User creator) {
+        Application application = getApplicationById(applicationId);
+        User interviewer = userRepository.findById(interviewerId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người phỏng vấn."));
+
+        if (interviewer.getStatus() != com.talenthub.recruitment.entity.enums.AccountStatus.ACTIVE) {
+            throw new IllegalArgumentException("Tài khoản người phỏng vấn đã bị khóa hoặc ngừng hoạt động.");
+        }
+
+        Interview interview = new Interview();
+        interview.setApplication(application);
+        interview.setInterviewer(interviewer);
+        interview.setScheduledAt(scheduledAt);
+        interview.setLocationOrMeetingLink(locationOrMeetingLink);
+        interview.setStatus(com.talenthub.recruitment.entity.enums.InterviewStatus.SCHEDULED);
+        interview.setCreatedBy(creator);
+
+        interviewRepository.save(interview);
+    }
+
+    @Transactional(readOnly = true)
     public CandidateCvFile getCvForHrOrInterviewer(Long applicationId, Long userId, String role) {
         Application application = getApplicationById(applicationId);
 
-        // Kiểm tra bảo mật cho HR Manager: Chỉ cho phép tải CV nếu công việc này thuộc quyền quản lý của họ
+        // Kiểm tra bảo mật cho HR Manager: Chỉ cho phép tải CV nếu công việc này thuộc
+        // quyền quản lý của họ
         if ("HR_MANAGER".equalsIgnoreCase(role)) {
             Long creatorId = application.getJob().getCreatedBy().getId();
             if (!creatorId.equals(userId)) {
                 throw new ResponseStatusException(org.springframework.http.HttpStatus.FORBIDDEN, "Access denied");
             }
         }
-        // Kiểm tra bảo mật cho Interviewer: Chỉ cho phép tải CV nếu được phân công phỏng vấn ứng viên này
+        // Kiểm tra bảo mật cho Interviewer: Chỉ cho phép tải CV nếu được phân công
+        // phỏng vấn ứng viên này
         else if ("INTERVIEWER".equalsIgnoreCase(role)) {
             List<Interview> interviews = getInterviews(applicationId);
             boolean assigned = false;
@@ -304,7 +337,6 @@ public class ApplicationService {
         return new CandidateCvFile(
                 new FileSystemResource(cvPath),
                 application.getCvFileName(),
-                application.getCvContentType()
-        );
+                application.getCvContentType());
     }
 }

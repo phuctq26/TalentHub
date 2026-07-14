@@ -11,14 +11,18 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+import com.talenthub.recruitment.entity.enums.AccountStatus;
+
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
     Optional<User> findByUsernameOrEmail(String username, String email);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
-
+    boolean existsByUsernameAndIdNot(String username, Long id);
+    boolean existsByEmailAndIdNot(String email, Long id);
+    @Query(value = "SELECT u.* FROM users u JOIN role r ON r.id = u.role_id WHERE r.name = :roleName AND CAST(u.status AS TEXT) = :statusStr ORDER BY u.full_name ASC", nativeQuery = true)
+    List<User> findByRoleNameAndStatus(@Param("roleName") String roleName, @Param("statusStr") String statusStr);
     @Query(
         value = """
             SELECT u.* FROM users u

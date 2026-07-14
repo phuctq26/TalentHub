@@ -160,24 +160,44 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
             Pageable pageable
     );
 
-    @Query(value = """
-            SELECT a.* FROM applications a
-            JOIN job_postings j ON j.id = a.job_id
-            WHERE (:jobId IS NULL OR a.job_id = :jobId)
-              AND (:hrManagerId IS NULL OR j.created_by_id = :hrManagerId)
-              AND (:statusText IS NULL OR :statusText = '' OR CAST(a.status AS TEXT) = :statusText)
-            ORDER BY a.submitted_at DESC
-            """, countQuery = """
-            SELECT COUNT(a.id) FROM applications a
-            JOIN job_postings j ON j.id = a.job_id
-            WHERE (:jobId IS NULL OR a.job_id = :jobId)
-              AND (:hrManagerId IS NULL OR j.created_by_id = :hrManagerId)
-              AND (:statusText IS NULL OR :statusText = '' OR CAST(a.status AS TEXT) = :statusText)
-            """, nativeQuery = true)
+    @Query("SELECT a FROM Application a " +
+           "JOIN FETCH a.job j " +
+           "JOIN FETCH a.candidate c " +
+           "LEFT JOIN FETCH j.createdBy u " +
+           "WHERE a.id = :id")
+    Optional<Application> findByIdWithRelations(@Param("id") Long id);
+
+    @Query("SELECT a FROM Application a " +
+           "JOIN FETCH a.job j " +
+           "JOIN FETCH a.candidate c " +
+           "LEFT JOIN FETCH j.createdBy u " +
+           "WHERE (:jobId IS NULL OR j.id = :jobId) " +
+           "  AND (:hrManagerId IS NULL OR j.createdBy.id = :hrManagerId) " +
+           "  AND (:statusText IS NULL OR :statusText = '' OR CAST(a.status AS string) = :statusText) " +
+           "ORDER BY a.submittedAt DESC")
     Page<Application> findByJobIdAndStatus(
             @Param("jobId") Long jobId,
             @Param("hrManagerId") Long hrManagerId,
             @Param("statusText") String statusText,
             Pageable pageable
+    );
+
+    /**
+     * Đếm số hồ sơ theo bộ lọc (jobId, hrManagerId, status) mà không load entity.
+     * Dùng để hiển thị số lượng trên từng tab trạng thái trong trang danh sách
+     * mà không gây ra LazyInitializationException khi dùng JOIN FETCH + phân trang.
+     */
+    @Query(value = """
+            SELECT COUNT(a.id)
+            FROM applications a
+            JOIN job_postings j ON j.id = a.job_id
+            WHERE (:jobId IS NULL OR j.id = :jobId)
+              AND (:hrManagerId IS NULL OR j.created_by_id = :hrManagerId)
+              AND (:statusText IS NULL OR :statusText = '' OR CAST(a.status AS TEXT) = :statusText)
+            """, nativeQuery = true)
+    long countByFiltersAndStatus(
+            @Param("jobId") Long jobId,
+            @Param("hrManagerId") Long hrManagerId,
+            @Param("statusText") String statusText
     );
 }
