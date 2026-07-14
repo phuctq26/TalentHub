@@ -152,7 +152,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th class="ps-4">Ứng viên</th>
-                                        <th th:if="${selectedJobId == null && applications == null}">Công việc tuyển dụng
+                                        <th th:if="${selectedJobId == null && (applications == null || isInterviewer)}">Công việc tuyển dụng
                                         </th>
                                         <th>Ngày nộp</th>
                                         <th>Số ngày ở trạng thái hiện tại</th>
@@ -176,10 +176,13 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td th:if="${selectedJobId == null && applications == null}">
-                                            <a th:href="@{/jobs/manage/{id}(id=${app.job.id})}"
-                                                class="text-dark hover-primary fw-medium" th:text="${app.job.title}">Job
-                                                Title</a>
+                                        <td th:if="${selectedJobId == null && (applications == null || isInterviewer)}">
+                                            <!-- If HR/Admin: Show clickable link -->
+                                            <a th:if="${!isInterviewer}" th:href="@{/jobs/manage/{id}(id=${app.job.id})}"
+                                                class="text-dark hover-primary fw-medium" th:text="${app.job.title}">Job Title</a>
+                                            <!-- If Interviewer: Show plain text to avoid 403 Forbidden -->
+                                            <span th:if="${isInterviewer}" class="text-dark fw-medium"
+                                                th:text="${app.job.title}">Job Title</span>
                                             <div class="text-muted small" th:text="${app.job.department}">Department</div>
                                         </td>
                                         <td>
@@ -202,12 +205,12 @@
                                         </td>
                                         <td class="pe-4 text-end">
                                             <!-- Dynamic Details URL: Interviewer vs HR/Admin -->
-                                            <a th:if="${applications != null}"
+                                            <a th:if="${isInterviewer}"
                                                 th:href="@{/interviewer/applications/{id}(id=${app.id})}"
                                                 class="btn btn-sm btn-secondary px-3">
                                                 Open
                                             </a>
-                                            <a th:if="${applications == null}"
+                                            <a th:if="${!isInterviewer}"
                                                 th:href="@{/hr/applications/{id}(id=${app.id})}"
                                                 class="btn btn-sm btn-secondary px-3">
                                                 Open
