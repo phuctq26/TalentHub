@@ -22,11 +22,12 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     Optional<Interview> findByIdWithRelations(@Param("id") Long id);
     List<Interview> findByApplication_IdOrderByScheduledAtDesc(Long applicationId);
 
-    @Query(value = """
-        SELECT i.* FROM interviews i
-        WHERE i.interviewer_id = :interviewerId
-        ORDER BY i.scheduled_at DESC
-        """, nativeQuery = true)
+    @Query("SELECT i FROM Interview i " +
+           "JOIN FETCH i.application a " +
+           "JOIN FETCH a.candidate c " +
+           "JOIN FETCH a.job j " +
+           "WHERE i.interviewer.id = :interviewerId " +
+           "ORDER BY i.scheduledAt DESC")
     List<Interview> findByInterviewerId(@Param("interviewerId") Long interviewerId);
 
     @Query(value = """
