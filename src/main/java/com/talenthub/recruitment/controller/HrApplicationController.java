@@ -383,6 +383,7 @@ public class HrApplicationController {
 
         // Đưa thông tin vào Model để hiển thị ngoài giao diện Thymeleaf
         model.addAttribute("applications", applications);
+        model.addAttribute("isInterviewer", true);
         model.addAttribute("title", "Đánh giá ứng viên");
         model.addAttribute("activeTab", "interviewer-apps");
 
