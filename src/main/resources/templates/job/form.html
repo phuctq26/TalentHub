@@ -1,5 +1,5 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/app-layout :: layout(~{::main-content}, th:text='${isEdit} ? \'Edit Job Posting\' : \'Create Job Posting\'', 'job-postings')}">
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, ${isEdit} ? 'Edit Job Posting' : 'Create Job Posting', 'job-postings')}">
 <body>
 <main th:fragment="main-content">
 
