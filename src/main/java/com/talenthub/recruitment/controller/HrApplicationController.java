@@ -118,6 +118,7 @@ public class HrApplicationController {
 
         model.addAttribute("title", "Recruitment Pipeline");
         model.addAttribute("activeTab", "applications");
+        model.addAttribute("isInterviewer", false);
 
         // Thiết lập thông tin ngữ cảnh công việc nếu đang lọc theo một Job cụ thể
         if (jobId != null) {
