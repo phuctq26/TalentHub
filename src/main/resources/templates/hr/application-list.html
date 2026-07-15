@@ -4,14 +4,13 @@
 <body>
     <main th:fragment="main-content">
 
-        <div id="application-list-container" hx-boost="true" hx-target="#application-list-container"
+        <div id="application-list-container" th:fragment="application-list-container" hx-boost="true" hx-target="#application-list-container"
             hx-select="#application-list-container" hx-swap="outerHTML">
             <!-- Breadcrumb -->
             <nav aria-label="breadcrumb" class="mb-3">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item" th:if="${isInterviewer == null}"><a th:href="@{/jobs/manage}"
-                            hx-boost="false">Jobs</a></li>
-                    <li class="breadcrumb-item" th:if="${isInterviewer == null && jobContext != null}">
+                    <li class="breadcrumb-item"><a th:href="@{/jobs/manage}" hx-boost="false">Jobs</a></li>
+                    <li class="breadcrumb-item" th:if="${jobContext != null}">
                         <a th:href="@{/jobs/manage/{id}(id=${jobContext.id})}" hx-boost="false"
                             th:text="${jobContext.title}">Job Detail</a>
                     </li>
@@ -37,15 +36,12 @@
                         <span th:if="${jobContext != null}">
                             Hồ sơ ứng tuyển của công việc: <strong th:text="${jobContext.title}"></strong>
                         </span>
-                        <span th:if="${jobContext == null && isInterviewer == null}">
+                        <span th:if="${jobContext == null}">
                             Tổng hợp tất cả hồ sơ ứng tuyển trong hệ thống
-                        </span>
-                        <span th:if="${isInterviewer}">
-                            Các hồ sơ ứng tuyển được giao cho bạn đánh giá và phỏng vấn
                         </span>
                     </p>
                 </div>
-                <div th:if="${jobContext != null && isInterviewer == null}">
+                <div th:if="${jobContext != null}">
                     <a th:href="@{/jobs/manage/{id}(id=${jobContext.id})}" hx-boost="false"
                         class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-arrow-left me-1"></i> Chi tiết Job
@@ -54,67 +50,67 @@
             </div>
 
             <!-- PIPELINE TABS (HR/Admin only) -->
-            <ul th:if="${applications == null}" class="nav nav-tabs mb-4">
+            <ul class="nav nav-tabs mb-4">
                 <li class="nav-item">
                     <a class="nav-link"
                         th:classappend="${selectedStatus == null || selectedStatus == ''} ? 'active fw-bold text-primary border-primary' : ''"
                         th:href="@{/hr/applications(jobId=${selectedJobId})}">
-                        All (<span th:text="${allCount}">0</span>)
+                        All (<span th:text="${counts.allCount}">0</span>)
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
                         th:classappend="${selectedStatus == 'APPLIED'} ? 'active fw-bold text-primary border-primary' : ''"
                         th:href="@{/hr/applications(status='APPLIED', jobId=${selectedJobId})}">
-                        Applied (<span th:text="${appliedCount}">0</span>)
+                        Applied (<span th:text="${counts.appliedCount}">0</span>)
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
                         th:classappend="${selectedStatus == 'SCREENING'} ? 'active fw-bold text-primary border-primary' : ''"
                         th:href="@{/hr/applications(status='SCREENING', jobId=${selectedJobId})}">
-                        Screening (<span th:text="${screeningCount}">0</span>)
+                        Screening (<span th:text="${counts.screeningCount}">0</span>)
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
                         th:classappend="${selectedStatus == 'INTERVIEW'} ? 'active fw-bold text-primary border-primary' : ''"
                         th:href="@{/hr/applications(status='INTERVIEW', jobId=${selectedJobId})}">
-                        Interview (<span th:text="${interviewCount}">0</span>)
+                        Interview (<span th:text="${counts.interviewCount}">0</span>)
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
                         th:classappend="${selectedStatus == 'OFFER'} ? 'active fw-bold text-primary border-primary' : ''"
                         th:href="@{/hr/applications(status='OFFER', jobId=${selectedJobId})}">
-                        Offer (<span th:text="${offerCount}">0</span>)
+                        Offer (<span th:text="${counts.offerCount}">0</span>)
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
                         th:classappend="${selectedStatus == 'HIRED'} ? 'active fw-bold text-primary border-primary' : ''"
                         th:href="@{/hr/applications(status='HIRED', jobId=${selectedJobId})}">
-                        Hired (<span th:text="${hiredCount}">0</span>)
+                        Hired (<span th:text="${counts.hiredCount}">0</span>)
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
                         th:classappend="${selectedStatus == 'REJECTED'} ? 'active fw-bold text-primary border-primary' : ''"
                         th:href="@{/hr/applications(status='REJECTED', jobId=${selectedJobId})}">
-                        Rejected (<span th:text="${rejectedCount}">0</span>)
+                        Rejected (<span th:text="${counts.rejectedCount}">0</span>)
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link"
                         th:classappend="${selectedStatus == 'WITHDRAWN'} ? 'active fw-bold text-primary border-primary' : ''"
                         th:href="@{/hr/applications(status='WITHDRAWN', jobId=${selectedJobId})}">
-                        Withdrawn (<span th:text="${withdrawnCount}">0</span>)
+                        Withdrawn (<span th:text="${counts.withdrawnCount}">0</span>)
                     </a>
                 </li>
             </ul>
 
             <!-- FILTER SEARCH BY JOB FORM (HR/Admin only) -->
-            <form th:if="${applications == null}" th:action="@{/hr/applications}" method="get" class="row g-3 mb-4">
+            <form th:action="@{/hr/applications}" method="get" class="row g-3 mb-4">
                 <input th:if="${selectedStatus != null}" type="hidden" name="status" th:value="${selectedStatus}">
                 <div class="col-md-8">
                     <select name="jobId" class="form-select">
@@ -139,8 +135,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-0">
 
-                    <!-- Dynamic checks for list variable name (page vs list) -->
-                    <th:block th:with="items=${applicationPage != null ? applicationPage.content : applications}">
+                    <th:block th:with="items=${applicationPage.content}">
 
                         <!-- Empty State -->
                         <div th:if="${#lists.isEmpty(items)}" class="p-5 text-center">
@@ -157,7 +152,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th class="ps-4">Ứng viên</th>
-                                        <th th:if="${selectedJobId == null && (applications == null || isInterviewer)}">
+                                        <th th:if="${selectedJobId == null}">
                                             Công việc tuyển dụng
                                         </th>
                                         <th>Ngày nộp</th>
@@ -171,57 +166,45 @@
                                         <td class="ps-4">
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar-circle-sm me-3"
-                                                    th:text="${#strings.substring(app.candidate.fullName, 0, 1).toUpperCase()}">
+                                                    th:text="${#strings.substring(app.candidateFullName, 0, 1).toUpperCase()}">
                                                     A
                                                 </div>
                                                 <div>
                                                     <h6 class="mb-0 fw-bold text-dark"
-                                                        th:text="${app.candidate.fullName}">
+                                                        th:text="${app.candidateFullName}">
                                                         Nguyễn Văn A</h6>
                                                     <span class="text-muted small"
-                                                        th:text="${app.candidate.email}">a@example.com</span>
+                                                        th:text="${app.candidateEmail}">a@example.com</span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td th:if="${selectedJobId == null && (applications == null || isInterviewer)}">
-                                            <!-- If HR/Admin: Show clickable link -->
-                                            <a th:if="${!isInterviewer}"
-                                                th:href="@{/jobs/manage/{id}(id=${app.job.id})}" hx-boost="false"
-                                                class="text-dark hover-primary fw-medium" th:text="${app.job.title}">Job
+                                        <td th:if="${selectedJobId == null}">
+                                            <a th:href="@{/jobs/manage/{id}(id=${app.jobId})}" hx-boost="false"
+                                                class="text-dark hover-primary fw-medium" th:text="${app.jobTitle}">Job
                                                 Title</a>
-                                            <!-- If Interviewer: Show plain text to avoid 403 Forbidden -->
-                                            <span th:if="${isInterviewer}" class="text-dark fw-medium"
-                                                th:text="${app.job.title}">Job Title</span>
-                                            <div class="text-muted small" th:text="${app.job.department}">Department
+                                            <div class="text-muted small" th:text="${app.jobDepartment}">Department
                                             </div>
                                         </td>
                                         <td>
                                             <span
-                                                th:text="${#temporals.format(app.submittedAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh')}">11/07/2026</span>
+                                                th:text="${#temporals.format(app.submissionDate, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh')}">11/07/2026</span>
                                         </td>
                                         <td>
-                                            <span class="fw-medium text-dark" th:text="${app.getDaysInStage()}">0</span>
+                                            <span class="fw-medium text-dark" th:text="${app.daysInCurrentStage}">0</span>
                                             ngày
                                         </td>
                                         <td>
                                             <span class="badge"
-                                                th:classappend="${app.status.name() == 'APPLIED'} ? ' bg-primary-subtle text-primary' :
-                                                              (${app.status.name() == 'SCREENING'} ? ' bg-info-subtle text-info' :
-                                                              (${app.status.name() == 'INTERVIEW'} ? ' bg-warning-subtle text-warning' :
-                                                              (${app.status.name() == 'OFFER'} ? ' bg-secondary-subtle text-secondary' :
-                                                              (${app.status.name() == 'HIRED'} ? ' bg-success-subtle text-success' : ' bg-danger-subtle text-danger'))))"
-                                                th:text="${app.status}">
+                                                th:classappend="${app.currentStatus.name() == 'APPLIED'} ? ' bg-primary-subtle text-primary' :
+                                                              (${app.currentStatus.name() == 'SCREENING'} ? ' bg-info-subtle text-info' :
+                                                              (${app.currentStatus.name() == 'INTERVIEW'} ? ' bg-warning-subtle text-warning' :
+                                                              (${app.currentStatus.name() == 'OFFER'} ? ' bg-secondary-subtle text-secondary' :
+                                                              (${app.currentStatus.name() == 'HIRED'} ? ' bg-success-subtle text-success' : ' bg-danger-subtle text-danger'))))"
+                                                th:text="${app.currentStatus}">
                                             </span>
                                         </td>
                                         <td class="pe-4 text-end">
-                                            <!-- Dynamic Details URL: Interviewer vs HR/Admin -->
-                                            <a th:if="${isInterviewer}"
-                                                th:href="@{/interviewer/applications/{id}(id=${app.id})}"
-                                                hx-boost="false" class="btn btn-sm btn-secondary px-3">
-                                                Open
-                                            </a>
-                                            <a th:if="${!isInterviewer}"
-                                                th:href="@{/hr/applications/{id}(id=${app.id})}" hx-boost="false"
+                                            <a th:href="@{/hr/applications/{id}(id=${app.id})}" hx-boost="false"
                                                 class="btn btn-sm btn-secondary px-3">
                                                 Open
                                             </a>

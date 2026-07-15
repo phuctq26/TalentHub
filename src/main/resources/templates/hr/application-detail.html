@@ -17,9 +17,9 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item" th:if="${!isInterviewer}"><a th:href="@{/jobs/manage}">Jobs</a></li>
-            <li class="breadcrumb-item" th:if="${!isInterviewer}"><a th:href="@{/jobs/manage/{id}(id=${app.job.id})}" th:text="${app.job.title}">Job Detail</a></li>
-            <li class="breadcrumb-item"><a th:href="${isInterviewer} ? @{/interviewer/applications} : @{/hr/jobs/{jobId}/applications(jobId=${app.job.id})}">Applications</a></li>
-            <li class="breadcrumb-item active" aria-current="page" th:text="${app.candidate.fullName}">Application Detail</li>
+            <li class="breadcrumb-item" th:if="${!isInterviewer}"><a th:href="@{/jobs/manage/{id}(id=${app.jobId})}" th:text="${app.jobTitle}">Job Detail</a></li>
+            <li class="breadcrumb-item"><a th:href="${isInterviewer} ? @{/interviewer/applications} : @{/hr/jobs/{jobId}/applications(jobId=${app.jobId})}">Applications</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${app.candidateFullName}">Application Detail</li>
         </ol>
     </nav>
 
@@ -34,26 +34,26 @@
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="d-flex align-items-center">
                             <div class="avatar-circle-lg me-3" 
-                                 th:text="${#strings.substring(app.candidate.fullName, 0, 1).toUpperCase()}">
+                                 th:text="${#strings.substring(app.candidateFullName, 0, 1).toUpperCase()}">
                                 A
                             </div>
                             <div>
-                                <h3 class="fw-bold mb-1 text-dark" th:text="${app.candidate.fullName}">Nguyễn Văn A</h3>
+                                <h3 class="fw-bold mb-1 text-dark" th:text="${app.candidateFullName}">Nguyễn Văn A</h3>
                                 <p class="text-muted mb-0">
                                     Ứng tuyển vị trí: 
-                                    <a th:href="@{/jobs/manage/{id}(id=${app.job.id})}" 
+                                    <a th:href="@{/jobs/manage/{id}(id=${app.jobId})}" 
                                        class="fw-bold text-primary" 
-                                       th:text="${app.job.title}">Job Title</a>
+                                       th:text="${app.jobTitle}">Job Title</a>
                                 </p>
                             </div>
                         </div>
                         <span class="badge fs-6 px-3 py-2"
-                              th:classappend="${app.status.name() == 'APPLIED'} ? ' bg-primary-subtle text-primary' :
-                                              (${app.status.name() == 'SCREENING'} ? ' bg-info-subtle text-info' :
-                                              (${app.status.name() == 'INTERVIEW'} ? ' bg-warning-subtle text-warning' :
-                                              (${app.status.name() == 'OFFER'} ? ' bg-secondary-subtle text-secondary' :
-                                              (${app.status.name() == 'HIRED'} ? ' bg-success-subtle text-success' : ' bg-danger-subtle text-danger'))))"
-                              th:text="${app.status}">
+                              th:classappend="${app.currentStatus.name() == 'APPLIED'} ? ' bg-primary-subtle text-primary' :
+                                              (${app.currentStatus.name() == 'SCREENING'} ? ' bg-info-subtle text-info' :
+                                              (${app.currentStatus.name() == 'INTERVIEW'} ? ' bg-warning-subtle text-warning' :
+                                              (${app.currentStatus.name() == 'OFFER'} ? ' bg-secondary-subtle text-secondary' :
+                                              (${app.currentStatus.name() == 'HIRED'} ? ' bg-success-subtle text-success' : ' bg-danger-subtle text-danger'))))"
+                              th:text="${app.currentStatus}">
                         </span>
                     </div>
 
@@ -61,16 +61,16 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <span class="text-muted small d-block">Email</span>
-                                <span class="text-dark fw-medium" th:text="${app.candidate.email}">email@example.com</span>
+                                <span class="text-dark fw-medium" th:text="${app.candidateEmail}">email@example.com</span>
                             </div>
                             <div class="col-md-6">
                                 <span class="text-muted small d-block">Ngày nộp hồ sơ</span>
-                                <span class="text-dark fw-medium" th:text="${#temporals.format(app.submittedAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh')}">11/07/2026</span>
+                                <span class="text-dark fw-medium" th:text="${#temporals.format(app.submissionDate, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh')}">11/07/2026</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- CV Download Button (Button secondary style) -->
+                    <!-- CV Download Button -->
                     <div class="mt-4">
                         <a th:href="${isInterviewer} ? @{/interviewer/applications/{id}/cv(id=${app.id})} : @{/hr/applications/{id}/cv(id=${app.id})}" 
                            class="btn btn-secondary w-100 py-2">
@@ -80,8 +80,8 @@
                 </div>
             </div>
 
-            <!-- Terminal Status Banners (English strings) -->
-            <div th:if="${app.status.name() == 'HIRED'}" class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-4">
+            <!-- Terminal Status Banners -->
+            <div th:if="${app.currentStatus.name() == 'HIRED'}" class="alert alert-success border-0 shadow-sm d-flex align-items-center mb-4">
                 <i class="bi bi-check-circle-fill fs-4 me-3"></i>
                 <div>
                     <h6 class="alert-heading fw-bold mb-1">Ứng viên đã trúng tuyển</h6>
@@ -89,7 +89,7 @@
                 </div>
             </div>
 
-            <div th:if="${app.status.name() == 'REJECTED'}" class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4">
+            <div th:if="${app.currentStatus.name() == 'REJECTED'}" class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4">
                 <i class="bi bi-x-circle-fill fs-4 me-3"></i>
                 <div>
                     <h6 class="alert-heading fw-bold mb-1">Hồ sơ bị từ chối</h6>
@@ -97,7 +97,7 @@
                 </div>
             </div>
 
-            <div th:if="${app.status.name() == 'WITHDRAWN'}" class="alert alert-secondary border-0 shadow-sm d-flex align-items-center mb-4">
+            <div th:if="${app.currentStatus.name() == 'WITHDRAWN'}" class="alert alert-secondary border-0 shadow-sm d-flex align-items-center mb-4">
                 <i class="bi bi-dash-circle-fill fs-4 me-3"></i>
                 <div>
                     <h6 class="alert-heading fw-bold mb-1">Hồ sơ đã được rút</h6>
@@ -106,7 +106,7 @@
             </div>
 
             <!-- PIPELINE STAGE CONTROLS (HR/Admin only and not in terminal status) -->
-            <div th:if="${!isInterviewer && app.status.name() != 'HIRED' && app.status.name() != 'REJECTED' && app.status.name() != 'WITHDRAWN'}" 
+            <div th:if="${!isInterviewer && app.currentStatus.name() != 'HIRED' && app.currentStatus.name() != 'REJECTED' && app.currentStatus.name() != 'WITHDRAWN'}" 
                  class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white border-0 pt-4 pb-0">
                     <h5 class="fw-bold text-dark"><i class="bi bi-gear text-primary me-1"></i> Cập nhật tiến trình ứng tuyển</h5>
@@ -116,7 +116,7 @@
                     
                     <div class="d-flex gap-2 flex-wrap">
                         <!-- Transition: APPLIED -> SCREENING -->
-                        <form th:if="${app.status.name() == 'APPLIED'}" 
+                        <form th:if="${app.currentStatus.name() == 'APPLIED'}" 
                               th:action="@{/hr/applications/{id}/status(id=${app.id})}" 
                               method="post" class="m-0">
                             <input type="hidden" name="status" value="SCREENING">
@@ -126,7 +126,7 @@
                         </form>
 
                         <!-- Transition: SCREENING -> INTERVIEW -->
-                        <form th:if="${app.status.name() == 'SCREENING'}" 
+                        <form th:if="${app.currentStatus.name() == 'SCREENING'}" 
                               th:action="@{/hr/applications/{id}/status(id=${app.id})}" 
                               method="post" class="m-0">
                             <input type="hidden" name="status" value="INTERVIEW">
@@ -136,7 +136,7 @@
                         </form>
 
                         <!-- Transition: INTERVIEW -> OFFER -->
-                        <form th:if="${app.status.name() == 'INTERVIEW'}" 
+                        <form th:if="${app.currentStatus.name() == 'INTERVIEW'}" 
                               th:action="@{/hr/applications/{id}/status(id=${app.id})}" 
                               method="post" class="m-0">
                             <input type="hidden" name="status" value="OFFER">
@@ -146,7 +146,7 @@
                         </form>
 
                         <!-- Transition: OFFER -> HIRED -->
-                        <form th:if="${app.status.name() == 'OFFER'}" 
+                        <form th:if="${app.currentStatus.name() == 'OFFER'}" 
                               th:action="@{/hr/applications/{id}/status(id=${app.id})}" 
                               method="post" class="m-0">
                             <input type="hidden" name="status" value="HIRED">
@@ -155,7 +155,7 @@
                             </button>
                         </form>
 
-                        <!-- Reject button (Available for all non-terminal stages) -->
+                        <!-- Reject button -->
                         <form th:action="@{/hr/applications/{id}/status(id=${app.id})}" 
                               method="post" class="m-0" 
                               onsubmit="return confirm('Bạn có chắc chắn muốn từ chối ứng viên này không?')">
@@ -165,8 +165,8 @@
                             </button>
                         </form>
 
-                        <!-- Interview Assignment Link (Only in INTERVIEW stage, styled as Button Primary) -->
-                        <a th:if="${app.status.name() == 'INTERVIEW'}"
+                        <!-- Interview Assignment Link -->
+                        <a th:if="${app.currentStatus.name() == 'INTERVIEW'}"
                            th:href="@{/hr/applications/{id}/assign-interview(id=${app.id})}"
                            class="btn btn-primary px-3 ms-auto">
                             <i class="bi bi-calendar-event me-1"></i> Interview Assignment
@@ -236,8 +236,8 @@
                     <div class="border-start border-primary border-3 ps-3 mb-4" th:each="eval : ${evaluations}">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="d-flex align-items-center">
-                                <strong th:text="${eval.interviewer.fullName}">Interviewer Name</strong>
-                                <span class="text-muted small ms-2" th:text="'(Phỏng vấn: ' + ${#temporals.format(eval.scheduledAt, 'dd/MM/yyyy', 'Asia/Ho_Chi_Minh')} + ')'"></span>
+                                <strong th:text="${eval.interviewerName}">Interviewer Name</strong>
+                                <span class="text-muted small ms-2" th:text="'(Phỏng vấn: ' + ${#temporals.format(eval.interviewDate, 'dd/MM/yyyy', 'Asia/Ho_Chi_Minh')} + ')'"></span>
                             </div>
                             <span class="text-warning font-monospace fs-5">
                                 <span th:text="${eval.rating != null && eval.rating >= 1 ? '★' : '☆'}"></span>
@@ -248,7 +248,7 @@
                             </span>
                         </div>
                         <p class="mb-1 text-dark font-medium" th:text="${eval.feedback}">Feedback text</p>
-                        <span class="text-muted small" th:text="'Ngày đánh giá: ' + ${#temporals.format(eval.evaluatedAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh')}"></span>
+                        <span class="text-muted small" th:text="'Ngày đánh giá: ' + ${#temporals.format(eval.evaluationDate, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh')}"></span>
                     </div>
                 </div>
             </div>
@@ -264,7 +264,7 @@
                 </div>
                 <div class="card-body p-4">
                     
-                    <!-- Add Note button (secondary) to toggle form -->
+                    <!-- Add Note button -->
                     <button class="btn btn-secondary btn-sm w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#addNoteCollapse" aria-expanded="false" aria-controls="addNoteCollapse">
                         <i class="bi bi-plus-lg me-1"></i> Add Note
                     </button>
@@ -294,10 +294,10 @@
                         
                         <div class="note-item mb-3 pb-3 border-bottom border-light" th:each="note : ${notes}">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <strong class="small text-dark" th:text="${note.author.fullName}">Tên Tác Giả</strong>
+                                <strong class="small text-dark" th:text="${note.authorName}">Tên Tác Giả</strong>
                                 <span class="text-muted small" th:text="${#temporals.format(note.createdAt, 'dd/MM/yyyy HH:mm', 'Asia/Ho_Chi_Minh')}">11/07/2026</span>
                             </div>
-                            <p class="text-muted small mb-0" th:text="${note.noteContent}">Nội dung ghi chú.</p>
+                            <p class="text-muted small mb-0" th:text="${note.content}">Nội dung ghi chú.</p>
                         </div>
                     </div>
 
