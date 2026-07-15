@@ -33,7 +33,8 @@ public class AuthService {
     public enum LoginResult {
         SUCCESS,
         INVALID_CREDENTIALS, // sai username/password
-        ACCOUNT_LOCKED, // tài khoản đang bị khóa
+        ACCOUNT_LOCKED, // tài khoản bị khóa vĩnh viễn bởi Admin (status = LOCKED)
+        TEMPORARY_LOCKED, // tài khoản bị khóa tạm thời do sai mật khẩu quá nhiều lần
         ACCOUNT_INACTIVE // tài khoản bị vô hiệu hóa bởi Admin
     }
 
@@ -68,7 +69,7 @@ public class AuthService {
 
         // Kiểm tra đang bị khóa tạm thời
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(Instant.now())) {
-            return LoginResult.ACCOUNT_LOCKED;
+            return LoginResult.TEMPORARY_LOCKED;
         }
 
         // Verify mật khẩu
@@ -76,7 +77,7 @@ public class AuthService {
             handleFailedAttempt(user);
             // Sau khi tăng failed attempts, kiểm tra xem có vừa bị khóa không
             if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(Instant.now())) {
-                return LoginResult.ACCOUNT_LOCKED;
+                return LoginResult.TEMPORARY_LOCKED;
             }
             return LoginResult.INVALID_CREDENTIALS;
         }
