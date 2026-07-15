@@ -142,18 +142,11 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     );
 
     @Query(
-            value = """
-                    SELECT *
-                    FROM applications
-                    WHERE job_id = :jobId
-                    ORDER BY submitted_at DESC
-                    """,
-            countQuery = """
-                    SELECT COUNT(*)
-                    FROM applications
-                    WHERE job_id = :jobId
-                    """,
-            nativeQuery = true
+        value = "SELECT a FROM Application a " +
+                "JOIN FETCH a.candidate c " +
+                "WHERE a.job.id = :jobId " +
+                "ORDER BY a.submittedAt DESC",
+        countQuery = "SELECT COUNT(a) FROM Application a WHERE a.job.id = :jobId"
     )
     Page<Application> findByJobId(
             @Param("jobId") Long jobId,
@@ -167,14 +160,21 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
            "WHERE a.id = :id")
     Optional<Application> findByIdWithRelations(@Param("id") Long id);
 
-    @Query("SELECT a FROM Application a " +
-           "JOIN FETCH a.job j " +
-           "JOIN FETCH a.candidate c " +
-           "LEFT JOIN FETCH j.createdBy u " +
-           "WHERE (:jobId IS NULL OR j.id = :jobId) " +
-           "  AND (:hrManagerId IS NULL OR j.createdBy.id = :hrManagerId) " +
-           "  AND (:statusText IS NULL OR :statusText = '' OR CAST(a.status AS string) = :statusText) " +
-           "ORDER BY a.submittedAt DESC")
+    @Query(
+        value = "SELECT a FROM Application a " +
+                "JOIN FETCH a.job j " +
+                "JOIN FETCH a.candidate c " +
+                "LEFT JOIN FETCH j.createdBy u " +
+                "WHERE (:jobId IS NULL OR j.id = :jobId) " +
+                "  AND (:hrManagerId IS NULL OR j.createdBy.id = :hrManagerId) " +
+                "  AND (:statusText IS NULL OR :statusText = '' OR CAST(a.status AS string) = :statusText) " +
+                "ORDER BY a.submittedAt DESC",
+        countQuery = "SELECT COUNT(a) FROM Application a " +
+                     "JOIN a.job j " +
+                     "WHERE (:jobId IS NULL OR j.id = :jobId) " +
+                     "  AND (:hrManagerId IS NULL OR j.createdBy.id = :hrManagerId) " +
+                     "  AND (:statusText IS NULL OR :statusText = '' OR CAST(a.status AS string) = :statusText)"
+    )
     Page<Application> findByJobIdAndStatus(
             @Param("jobId") Long jobId,
             @Param("hrManagerId") Long hrManagerId,

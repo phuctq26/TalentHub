@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
+  @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "interviewer" })
   Optional<Interview> findFirstByApplication_IdOrderByScheduledAtAsc(Long applicationId);
 
   @Query("SELECT i FROM Interview i " +
@@ -21,7 +22,11 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
       "WHERE i.id = :id")
   Optional<Interview> findByIdWithRelations(@Param("id") Long id);
 
-  List<Interview> findByApplication_IdOrderByScheduledAtDesc(Long applicationId);
+  @Query("SELECT i FROM Interview i " +
+      "JOIN FETCH i.interviewer " +
+      "WHERE i.application.id = :applicationId " +
+      "ORDER BY i.scheduledAt DESC")
+  List<Interview> findByApplication_IdOrderByScheduledAtDesc(@Param("applicationId") Long applicationId);
 
   @Query("SELECT i FROM Interview i " +
       "JOIN FETCH i.application a " +

@@ -1,6 +1,7 @@
 package com.talenthub.recruitment.controller;
 
 import com.talenthub.recruitment.dto.UserRegisterDto;
+import com.talenthub.recruitment.entity.AuditLog;
 import com.talenthub.recruitment.entity.User;
 import com.talenthub.recruitment.service.AuthService;
 import com.talenthub.recruitment.service.PasswordResetService;
@@ -65,7 +66,7 @@ public class AuthController {
                 session.setAttribute("currentUser", loggedInUser);
                 session.setAttribute("currentRole", loggedInUser.getRole().getName());
                 session.setMaxInactiveInterval(30 * 60);
-                com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
+                AuditLog log = new AuditLog();
                 log.setActorUser(loggedInUser);
                 log.setActorUsernameSnapshot(loggedInUser.getUsername());
                 log.setActorFullNameSnapshot(loggedInUser.getFullName());
@@ -79,9 +80,20 @@ public class AuthController {
                 lockLog.setActorUsernameSnapshot(usernameOrEmail);
                 lockLog.setActorFullNameSnapshot("Khách");
                 lockLog.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.ACCOUNT_LOCKED);
-                lockLog.setDescription("Tài khoản bị khóa do đăng nhập sai quá nhiều lần");
+                lockLog.setDescription("Tài khoản bị khóa vĩnh viễn");
                 lockLog.setIpAddress(ipAddress);
                 auditLogRepository.save(lockLog);
+
+                model.addAttribute("permanentLockError", true);
+                return "auth/login";
+            case TEMPORARY_LOCKED:
+                com.talenthub.recruitment.entity.AuditLog tempLockLog = new com.talenthub.recruitment.entity.AuditLog();
+                tempLockLog.setActorUsernameSnapshot(usernameOrEmail);
+                tempLockLog.setActorFullNameSnapshot("Khách");
+                tempLockLog.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.ACCOUNT_LOCKED);
+                tempLockLog.setDescription("Tài khoản bị khóa do đăng nhập sai quá nhiều lần");
+                tempLockLog.setIpAddress(ipAddress);
+                auditLogRepository.save(tempLockLog);
 
                 model.addAttribute("lockoutError", true);
                 return "auth/login";
@@ -97,6 +109,16 @@ public class AuthController {
                 model.addAttribute("genericError", true);
                 return "auth/login";
             case ACCOUNT_INACTIVE:
+                com.talenthub.recruitment.entity.AuditLog inactiveLog = new com.talenthub.recruitment.entity.AuditLog();
+                inactiveLog.setActorUsernameSnapshot(usernameOrEmail);
+                inactiveLog.setActorFullNameSnapshot("Khách");
+                inactiveLog.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.SIGN_IN_FAILURE);
+                inactiveLog.setDescription("Đăng nhập thất bại (tài khoản đã bị vô hiệu hóa)");
+                inactiveLog.setIpAddress(ipAddress);
+                auditLogRepository.save(inactiveLog);
+
+                model.addAttribute("inactiveError", true);
+                return "auth/login";
             default:
                 model.addAttribute("genericError", true);
                 return "auth/login";
@@ -126,24 +148,13 @@ public class AuthController {
             Model model,
             RedirectAttributes redirectAttributes) {
 
-        PasswordResetService.SendOtpResult result = passwordResetService.sendOtp(email.trim().toLowerCase());
+        // Thực hiện gửi OTP ngầm (nếu email đúng và hoạt động sẽ thực sự gửi)
+        passwordResetService.sendOtp(email.trim().toLowerCase());
 
-        if (result == PasswordResetService.SendOtpResult.EMAIL_NOT_FOUND) {
-            model.addAttribute("errorMessage", "Email này chưa được đăng ký trong hệ thống.");
-            model.addAttribute("email", email);
-            return "auth/forgot-password";
-        }
-
-        if (result == PasswordResetService.SendOtpResult.ACCOUNT_INACTIVE) {
-            model.addAttribute("errorMessage",
-                    "Tài khoản này đã bị vô hiệu hoá. Vui lòng liên hệ quản trị viên để được hỗ trợ.");
-            model.addAttribute("email", email);
-            return "auth/forgot-password";
-        }
-
-        // OTP đã được gửi — chuyển sang trang nhập OTP
+        // Luôn chuyển hướng người dùng sang trang nhập OTP và báo gửi thành công chung
+        // để bảo mật
         redirectAttributes.addFlashAttribute("infoMessage",
-                "Mã OTP đã được gửi đến " + email + ". Vui lòng kiểm tra hộp thư.");
+                "Mã OTP đã được gửi đến " + email + " (nếu email đã được đăng ký). Vui lòng kiểm tra hộp thư.");
         return "redirect:/verify-otp?email=" + email.trim().toLowerCase();
     }
 
@@ -152,24 +163,14 @@ public class AuthController {
             @RequestParam("email") String email,
             RedirectAttributes redirectAttributes) {
 
-        PasswordResetService.SendOtpResult result = passwordResetService.sendOtp(email.trim().toLowerCase());
+        // Thực hiện gửi OTP ngầm
+        passwordResetService.sendOtp(email.trim().toLowerCase());
 
-        if (result == PasswordResetService.SendOtpResult.EMAIL_NOT_FOUND) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Email này chưa được đăng ký trong hệ thống.");
-            return "redirect:/forgot-password";
-        }
-
-        if (result == PasswordResetService.SendOtpResult.ACCOUNT_INACTIVE) {
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Tài khoản này đã bị vô hiệu hoá. Vui lòng liên hệ quản trị viên.");
-            return "redirect:/forgot-password";
-        }
-
+        // Luôn chuyển hướng người dùng sang trang nhập OTP và báo gửi thành công chung
         redirectAttributes.addFlashAttribute("infoMessage",
-                "Mã OTP mới đã được gửi lại đến " + email + ". Vui lòng kiểm tra hộp thư.");
+                "Mã OTP mới đã được gửi lại đến " + email + " (nếu email đã được đăng ký). Vui lòng kiểm tra hộp thư.");
         return "redirect:/verify-otp?email=" + email.trim().toLowerCase();
     }
-
 
     // ──────────────────────────────────────────────
     // Bước 2: Nhập OTP — Xác minh
@@ -293,7 +294,7 @@ public class AuthController {
 
         try {
             com.talenthub.recruitment.entity.User newUser = userService.registerCandidate(dto);
-            
+
             com.talenthub.recruitment.entity.AuditLog log = new com.talenthub.recruitment.entity.AuditLog();
             log.setActorUser(newUser);
             log.setActorUsernameSnapshot(newUser.getUsername());
@@ -301,7 +302,7 @@ public class AuthController {
             log.setEventType(com.talenthub.recruitment.entity.enums.AuditEventType.ACCOUNT_CREATED);
             log.setDescription("Tài khoản mới được đăng ký: " + newUser.getUsername());
             auditLogRepository.save(log);
-            
+
             redirectAttributes.addFlashAttribute("successMessage", "Account created successfully. Please login.");
             return "redirect:/login";
         } catch (IllegalArgumentException e) {
