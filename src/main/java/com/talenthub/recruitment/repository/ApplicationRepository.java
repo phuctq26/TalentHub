@@ -80,6 +80,21 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     @Modifying
     @Query(value = """
+            UPDATE applications
+            SET status = CAST(:status AS application_status),
+                status_changed_at = :statusChangedAt,
+                withdrawn_at = :withdrawnAt
+            WHERE id = :applicationId
+            """, nativeQuery = true)
+    int updateApplicationStatus(
+            @Param("applicationId") Long applicationId,
+            @Param("status") String status,
+            @Param("statusChangedAt") Instant statusChangedAt,
+            @Param("withdrawnAt") Instant withdrawnAt
+    );
+
+    @Modifying
+    @Query(value = """
             INSERT INTO applications (
                 job_id,
                 candidate_id,

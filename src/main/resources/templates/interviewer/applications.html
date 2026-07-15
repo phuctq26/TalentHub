@@ -1,0 +1,82 @@
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, ${title}, ${activeTab})}">
+
+<body>
+<main th:fragment="main-content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0 fw-bold text-dark">Lịch phỏng vấn của tôi</h2>
+    </div>
+
+    <!-- Danh sách lịch phỏng vấn -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th class="py-3 px-4">Ứng viên</th>
+                        <th class="py-3">Vị trí ứng tuyển</th>
+                        <th class="py-3">Lịch phỏng vấn</th>
+                        <th class="py-3">Hình thức/Địa điểm</th>
+                        <th class="py-3">Trạng thái đánh giá</th>
+                        <th class="py-3 text-end px-4">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${interviews == null or interviews.isEmpty()}">
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-3"></i>
+                            Bạn chưa có lịch phỏng vấn nào được phân công.
+                        </td>
+                    </tr>
+                    <tr th:each="interview : ${interviews}">
+                        <td class="px-4">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="avatar bg-primary-subtle text-primary fw-bold rounded-circle d-flex align-items-center justify-content-center"
+                                     style="width: 40px; height: 40px;"
+                                     th:text="${#strings.substring(interview.application.candidate.fullName, 0, 1).toUpperCase()}">
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold" th:text="${interview.application.candidate.fullName}"></h6>
+                                    <small class="text-muted" th:text="${interview.application.candidate.email}"></small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span th:text="${interview.application.job.title}"></span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-calendar-event text-primary"></i>
+                                <span th:text="${#dates.format(interview.scheduledAt, 'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;" 
+                                  th:title="${interview.locationOrMeetingLink}"
+                                  th:text="${interview.locationOrMeetingLink != null and !interview.locationOrMeetingLink.isBlank() ? interview.locationOrMeetingLink : 'Chưa cập nhật'}">
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill"
+                                  th:classappend="${interview.status.name() == 'SCHEDULED'} ? 'bg-warning text-dark' : 'bg-success'"
+                                  th:text="${interview.status.name() == 'SCHEDULED'} ? 'Chờ đánh giá' : 'Đã đánh giá'">
+                            </span>
+                        </td>
+                        <td class="text-end px-4">
+                            <a th:href="@{/interviewer/applications/{id}(id=${interview.application.id})}"
+                               class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                <i class="bi bi-eye me-1"></i> Xem chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</main>
+</body>
+</html>
