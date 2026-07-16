@@ -49,7 +49,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """,
         nativeQuery = true
     )
-    Page<User> search(
+    Page<User> search1(
             @Param("keyword") String keyword,
             @Param("roleId") Integer roleId,
             @Param("statusStr") String statusStr,
@@ -67,4 +67,23 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "SELECT r.name, COUNT(u.id) FROM role r LEFT JOIN users u ON u.role_id = r.id GROUP BY r.name", nativeQuery = true)
     List<Object[]> countUsersGroupByRole();
+
+    @Query(
+            value = """
+        SELECT u FROM User u
+        WHERE (:roleId IS NULL OR u.role.id = :roleId)
+          AND (:statusStr IS NULL OR CAST(u.status AS string) = :statusStr)
+          AND (:keyword IS NULL OR :keyword = '' OR
+               LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+               LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+               LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+               u.phone LIKE CONCAT('%', :keyword, '%'))
+        """
+    )
+    Page<User> search(
+            @Param("keyword") String keyword,
+            @Param("roleId") Integer roleId,
+            @Param("statusStr") String statusStr,
+            Pageable pageable
+    );
 }

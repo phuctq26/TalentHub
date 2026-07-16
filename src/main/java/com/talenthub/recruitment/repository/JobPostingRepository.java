@@ -103,4 +103,6 @@ public interface JobPostingRepository extends JpaRepository<JobPosting, Long> {
       ORDER BY updated_at DESC NULLS LAST, created_at DESC
       """, nativeQuery = true)
   List<JobPosting> findReportJobsForHrOrAdmin(@Param("hrManagerId") Long hrManagerId);
+
+
 }
