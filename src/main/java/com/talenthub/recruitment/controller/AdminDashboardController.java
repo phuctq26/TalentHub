@@ -77,15 +77,15 @@ public class AdminDashboardController {
         // 4. Tổng quan tuyển dụng (Recruitment Summary)
         long activeJobs = jobPostingRepository.countActiveJobsForHrOrAdmin(null);
         long totalApplications = applicationRepository.countAwaitingReviewForHrOrAdmin(null);
-        long interviewStage = applicationRepository.countInterviewStage();
+        //long interviewStage = applicationRepository.countInterviewStage();
         long upcomingInterviewCount = interviewRepository.countUpcomingInterviewsForAdmin();
-        long hiredCount = applicationRepository.countHired();
+       // long hiredCount = applicationRepository.countHired();
 
         model.addAttribute("activeJobs", activeJobs);
         model.addAttribute("totalApplications", totalApplications);
-        model.addAttribute("interviewStage", interviewStage);
+        //model.addAttribute("interviewStage", interviewStage);
         model.addAttribute("upcomingInterviewCount", upcomingInterviewCount);
-        model.addAttribute("hiredCount", hiredCount);
+        //model.addAttribute("hiredCount", hiredCount);
 
         List<JobPosting> activeJobsList = jobPostingRepository.findActiveJobsForHrOrAdmin(null);
         Map<Long, Long> jobAppCounts = new HashMap<>();
