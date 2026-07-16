@@ -1,48 +1,133 @@
-<!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Apply Job</title>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/app-layout :: layout(~{::main-content}, 'Apply Job', 'candidate-jobs')}">
 <body>
-<header>
-    <nav>
-        <a th:href="@{/jobs}">View Jobs</a>
-    </nav>
-</header>
+<main th:fragment="main-content">
 
-<main>
-    <p th:if="${error}" th:text="${error}"></p>
-
-    <form th:action="@{/jobs/{id}/apply(id=${job.id})}" method="post" enctype="multipart/form-data">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
         <div>
-            <label>Job Title</label>
-            <input type="text" th:value="${job.title}" readonly>
+            <h2 class="mb-1 fw-bold text-dark">Apply Job</h2>
+            <p class="text-muted mb-0" th:text="${job.title}">Java Developer</p>
+        </div>
+        <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Job Detail
+        </a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Application error</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-send text-primary me-1"></i> Application Form
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/jobs/{id}/apply(id=${job.id})}" method="post" enctype="multipart/form-data">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Job Title</label>
+                                <input type="text" class="form-control" th:value="${job.title}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Department</label>
+                                <input type="text" class="form-control"
+                                       th:value="${job.department != null && !#strings.isEmpty(job.department) ? job.department : 'N/A'}"
+                                       readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Candidate Name</label>
+                                <input type="text" class="form-control" th:value="${candidate.fullName}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email</label>
+                                <input type="email" class="form-control" th:value="${candidate.email}" readonly>
+                            </div>
+                            <div class="col-12">
+                                <label for="cvFile" class="form-label fw-semibold">
+                                    CV File <span class="text-danger">*</span>
+                                </label>
+                                <input id="cvFile"
+                                       type="file"
+                                       name="cvFile"
+                                       accept=".pdf,.doc,.docx"
+                                       class="form-control"
+                                       required>
+                                <div class="form-text">Accepted formats: PDF, DOC, DOCX.</div>
+                            </div>
+                            <div class="col-12">
+                                <label for="coverLetter" class="form-label fw-semibold">Cover Letter</label>
+                                <textarea id="coverLetter"
+                                          name="coverLetter"
+                                          rows="7"
+                                          class="form-control"
+                                          placeholder="Write a short message for the recruiter..."
+                                          th:text="${coverLetter}"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 flex-wrap mt-4 pt-3 border-top">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-1"></i> Submit Application
+                            </button>
+                            <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
 
-        <div>
-            <label>Candidate Name</label>
-            <input type="text" th:value="${candidate.fullName}" readonly>
-        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-briefcase text-primary me-1"></i> Job Summary
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <span class="job-type-badge" th:text="${job.department}">Engineering</span>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-3" th:text="${job.title}">Java Developer</h5>
+                    <div class="d-flex align-items-start gap-2 text-secondary mb-2">
+                        <i class="bi bi-geo-alt text-primary"></i>
+                        <span th:text="${job.location != null && !#strings.isEmpty(job.location) ? job.location : 'N/A'}">Hanoi</span>
+                    </div>
+                    <div class="d-flex align-items-start gap-2 text-secondary mb-2">
+                        <i class="bi bi-cash-stack text-primary"></i>
+                        <span th:text="${job.salaryRange != null && !#strings.isEmpty(job.salaryRange) ? job.salaryRange : 'Negotiable'}">
+                            Negotiable
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-start gap-2 text-secondary">
+                        <i class="bi bi-calendar-event text-primary"></i>
+                        <span th:text="${job.applicationDeadline != null ? #temporals.format(job.applicationDeadline, 'dd/MM/yyyy') : 'Open'}">
+                            Open
+                        </span>
+                    </div>
+                </div>
+            </div>
 
-        <div>
-            <label>Email</label>
-            <input type="email" th:value="${candidate.email}" readonly>
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold text-dark">
+                        <i class="bi bi-person-circle text-primary me-1"></i> Candidate
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="fw-semibold text-dark" th:text="${candidate.fullName}">Candidate Name</div>
+                    <div class="text-secondary small" th:text="${candidate.email}">candidate@example.com</div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div>
-            <label>CV File</label>
-            <input type="file" name="cvFile" accept=".pdf,.doc,.docx" required>
-        </div>
-
-        <div>
-            <label>Cover Letter</label>
-            <textarea name="coverLetter" rows="8" th:text="${coverLetter}"></textarea>
-        </div>
-
-        <button type="submit">Submit</button>
-        <a th:href="@{/jobs/{id}(id=${job.id})}">Cancel</a>
-    </form>
 </main>
 </body>
 </html>
